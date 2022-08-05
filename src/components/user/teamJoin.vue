@@ -66,8 +66,16 @@ export default {
 
       alert('你想加入的球队是：' + JSON.stringify(teamObj))
 
-      const { data: res } = await axios.post('http://127.0.0.1:3030/team/join')
+      const userID = localStorage.getItem('token')
+      // console.log(userID)
+
+      const { data: res } = await axios.post('http://127.0.0.1:3030/team/join', {
+        userID,
+        teamID: innerID,
+        teamName: innerName
+      })
       console.log(res)
+      this.$router.replace('/my/userinfo')
     },
     querySearch (queryString, cb) {
       const teamList = this.teamList
@@ -108,7 +116,7 @@ export default {
     //   console.log('开始搜索' + queryString)
     // }
   },
-  mounted () {
+  created () {
     this.loadAll()
   }
 }
