@@ -8,8 +8,12 @@ import CreateTeam from '@/views/CreateTeam/CreateTeam.vue'
 import UserLogin from '@/components/user/UserLogin.vue'
 import getUserinfo from '@/utils/getUserinfo'
 import UserInfo from '@/components/user/UserInfo.vue'
-import teamCreate from '@/components/user/teamCreate.vue'
-import teamJoin from '@/components//user/teamJoin.vue'
+import teamCreate from '@/components/teamAction/teamCreate.vue'
+import teamJoin from '@/components/teamAction/teamJoin.vue'
+import UserData from '@/components/user/UserData.vue'
+import setPassword from '@/components/user/setPassword.vue'
+import createTeamAction from '@/components/teamAction/createTeamAction.vue'
+import teamActivity from '@/components/teamAction/teamActivity.vue'
 
 Vue.use(VueRouter)
 
@@ -23,9 +27,11 @@ const routes = [
   { path: '/user/login', component: UserLogin, meta: { TabBarShow: false } },
   { path: '/my/userinfo', component: UserInfo, meta: { TabBarShow: false } },
   { path: '/team/create', component: teamCreate, meta: { TabBarShow: false } },
-  { path: '/team/join', component: teamJoin, meta: { TabBarShow: false } }
-
-  // { path: '/user/reguser', component: UserReguser, meta: { TabBarShow: false } }
+  { path: '/team/join', component: teamJoin, meta: { TabBarShow: false } },
+  { path: '/my/update', component: UserData, meta: { TabBarShow: false } },
+  { path: '/my/setPassword', component: setPassword, meta: { TabBarShow: false } },
+  { path: '/team/createTeamAction', component: createTeamAction, meta: { TabBarShow: false } },
+  { path: '/team/activity', component: teamActivity, meta: { TabBarShow: false } }
 
 ]
 
@@ -53,7 +59,21 @@ router.beforeEach((to, from, next) => {
       }
     }
   }
-
+  if (to.path === '/my/setpassword') {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      next('/user/login')
+    } else {
+      const res = getUserinfo()
+      res.then(res1 => {
+        if (res1.status === 403) {
+          alert(JSON.stringify(res1))
+          next('/user/login')
+        }
+        next()
+      })
+    }
+  }
   next()
 })
 

@@ -75,14 +75,7 @@ export default {
         if (res.data.status === 0) {
           //   alert('登陆成功')
           localStorage.setItem('token', res.data.token)
-          this.$router.replace('/my/userinfo')
-          // console.log(this.$router)
-          // if (res.data.token) {
-          //   localStorage.setItem('token', res.data.token)
-          //   this.$router.push('/my/userinfo')
-          // } else {
-          //   alert('设置token失败')
-          // }
+          this.$router.replace('/user')
         }
       }).catch((err) => {
         console.log(err)

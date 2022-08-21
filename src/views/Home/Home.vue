@@ -24,10 +24,10 @@
         <van-image class="van-swipe-img" :src="newList[3].picUrl" fix="cover" />
       </van-swipe-item> -->
       <van-swipe-item>
-        <van-image class="van-swipe-img" src="//n.sinaimg.cn/sports/crawl/270/w750h320/20220627/7fbf-cfdafb302ffa174a4b8fa6476b29cd81.jpg" fix=" fill" show-error="true" />
+        <van-image class="van-swipe-img" src="//n.sinaimg.cn/sports/crawl/270/w750h320/20220627/7fbf-cfdafb302ffa174a4b8fa6476b29cd81.jpg" fix=" fill" :show-error="true" />
       </van-swipe-item>
       <van-swipe-item>
-        <van-image class="van-swipe-img" src="//n.sinaimg.cn/sports/crawl/117/w550h367/20220627/4495-66a5f28d19a1751705da9964e2314f0c.jpg" fix=" fill" show-error="true"/>
+        <van-image class="van-swipe-img" src="//n.sinaimg.cn/sports/crawl/117/w550h367/20220627/4495-66a5f28d19a1751705da9964e2314f0c.jpg" fix=" fill" :show-error="true"/>
       </van-swipe-item>
     </van-swipe>
     <div class="btn_wrap">
@@ -70,13 +70,17 @@ export default {
   name: 'Home',
   data () {
     return {
-      newList: []
+      newList: [],
+      value: ''
     }
   },
   created () {
     this.initImgList()
   },
   methods: {
+    onSearch () {
+      console.log('搜索')
+    },
     async initImgList () {
       const { data: res } = await axios.get('htt://api.tianapi.com/tiyu/index?key=d388d86cba602a7b9d3db549bf2e4aca&num=4')
       this.newList = res.newslist
