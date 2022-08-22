@@ -58,6 +58,7 @@ import axios from 'axios'
 export default {
   data () {
     return {
+      teamname: '',
       ruleForm: {
         name: '',
         region: '',
@@ -109,7 +110,8 @@ export default {
               type: this.ruleForm.type[0],
               region: this.ruleForm.region,
               desc: this.ruleForm.desc,
-              resource: this.ruleForm.resource
+              resource: this.ruleForm.resource,
+              teamname: this.teamname
             },
             headers: { Authorization: token }
           })
@@ -131,6 +133,20 @@ export default {
     resetForm (formName) {
       this.$refs[formName].resetFields()
     }
+  },
+  created () {
+    const token = localStorage.getItem('token')
+    const resAxios = axios({
+      url: 'http://127.0.0.1:3030/team/teamInfo',
+      method: 'get',
+      headers: { Authorization: token }
+    })
+    resAxios.then(val => {
+      console.log(val.data)
+      this.teamname = val.data.teamname
+    }).catch(err => {
+      console.log(err)
+    })
   }
 }
 </script>
