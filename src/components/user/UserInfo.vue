@@ -163,7 +163,7 @@ export default {
         const picSrcArr = this.userinfo.userpic.split('\\').filter((item, index, array) => {
           return index > 0
         })
-        // console.log(picSrcArr)
+        console.log(picSrcArr)
         let str = ''
         for (const item of picSrcArr) {
           str += '/' + item

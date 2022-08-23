@@ -101,7 +101,7 @@ export default {
           console.log(this.ruleForm)
           const token = localStorage.getItem('token')
           const res1 = axios({
-            url: 'http://127.0.0.1:3030/team/createTeamAction',
+            url: 'http://127.0.0.1:3030/team/createTeamActivity',
             method: 'post',
             data: {
               name: this.ruleForm.name,

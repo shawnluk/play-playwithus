@@ -13,6 +13,7 @@
     "core-js": "^3.8.3",
     "element-ui": "^2.14.1",
     "multer": "^1.4.5-lts.1",
+    "v-fit-columns": "^0.2.0",
     "vant": "^2.12.48",
     "vue": "^2.6.14",
     "vue-baidu-map": "^0.21.22",

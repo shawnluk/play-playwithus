@@ -6,7 +6,9 @@ import Vant from 'vant'
 import 'vant/lib/index.css'
 import router from './router'
 import BaiduMap from 'vue-baidu-map'
+import Plugin from 'v-fit-columns'
 
+Vue.use(Plugin)
 Vue.use(ElementUI)
 Vue.use(Vant)
 Vue.use(BaiduMap, {

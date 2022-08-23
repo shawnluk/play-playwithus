@@ -12,7 +12,7 @@ import teamCreate from '@/components/teamAction/teamCreate.vue'
 import teamJoin from '@/components/teamAction/teamJoin.vue'
 import UserData from '@/components/user/UserData.vue'
 import setPassword from '@/components/user/setPassword.vue'
-import createTeamAction from '@/components/teamAction/createTeamAction.vue'
+import createTeamAction from '@/components/teamAction/createTeamActivity.vue'
 import teamActivity from '@/components/teamAction/teamActivity.vue'
 
 Vue.use(VueRouter)
