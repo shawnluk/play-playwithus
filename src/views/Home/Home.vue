@@ -11,18 +11,6 @@
       <div @click="onSearch" class="search_text">搜索</div>
     </div>
     <van-swipe class="my-swipe" :autoplay="3000"  lazy-render>
-      <!-- <van-swipe-item >
-        <van-image class="van-swipe-img" :src="newList[0].picUrl" fix="cover" />
-      </van-swipe-item>
-      <van-swipe-item>
-        <van-image class="van-swipe-img" :src="newList[1].picUrl" fix="cover" />
-      </van-swipe-item>
-      <van-swipe-item>
-        <van-image class="van-swipe-img" :src="newList[2].picUrl" fix="cover" />
-      </van-swipe-item>
-      <van-swipe-item>
-        <van-image class="van-swipe-img" :src="newList[3].picUrl" fix="cover" />
-      </van-swipe-item> -->
       <van-swipe-item>
         <van-image class="van-swipe-img" src="//n.sinaimg.cn/sports/crawl/270/w750h320/20220627/7fbf-cfdafb302ffa174a4b8fa6476b29cd81.jpg" fix=" fill" :show-error="true" />
       </van-swipe-item>
@@ -42,24 +30,10 @@
     <el-tabs type="border-card" stretch>
       <el-tab-pane>
         <span slot="label"><i class="el-icon-date"></i> 近期活动</span>
-        近期活动近期活动近期活动近期活动近期活动近期活动近期活动近期活动近期活动近期活动近期活动
       </el-tab-pane>
-      <el-tab-pane label="球队推荐">球队推荐球队推荐球队推荐球队推荐球队推荐球队推荐球队推荐球队推荐球队推荐球队推荐球队推荐球队推荐球队推荐</el-tab-pane>
+      <el-tab-pane label="球队推荐"></el-tab-pane>
       <el-tab-pane label="球场推荐">球场推荐</el-tab-pane>
     </el-tabs>
-    <!-- <el-carousel indicator-position="outside" loop="true">
-       <h1>111</h1> -->
-      <!-- <el-carousel-item  style="height:300px" v-for=" item in newList" :key="item.id"> -->
-      <!-- <el-carousel-item  style="height:300px"> -->
-
-        <!-- <img src="https://api-hmugo-web.itheima.net/pyg/banner1.png" alt=""> -->
-        <!-- <el-image :src="item.picUrl" style="width: 100%; height: 100%;" fit="cover"></el-image> -->
-        <!-- <img class="swiper_img" :src="item.picUrl" alt /> -->
-        <!-- <img class="swiper_img" src="//n.sinaimg.cn/sports/crawl/270/w750h320/20220627/7fbf-cfdafb302ffa174a4b8fa6476b29cd81.jpg" alt /> -->
-        <!-- <img class="swiper_img" src="//n.sinaimg.cn/sports/crawl/117/w550h367/20220627/4495-66a5f28d19a1751705da9964e2314f0c.jpg" alt /> -->
-        <!-- <h3>{{item.id}}</h3>
-      </el-carousel-item>
-    </el-carousel> -->
   </div>
 </template>
 
@@ -76,6 +50,25 @@ export default {
   },
   created () {
     this.initImgList()
+
+    // todo =>获取用户信息
+    // const token = localStorage.getItem('token')
+    // if (!token) {
+    //   alert('齐')
+    // }
+    // const UserRes = axios({
+    //   method: 'get',
+    //   url: 'http://127.0.0.1:3030/my/userinfo',
+    //   headers: { Authorization: token }
+    // })
+    // UserRes.then(res => {
+    //   console.log(res)
+    // }).catch(err => {
+    //   console.log(err)
+    // })
+
+    // todo => 获取球队信息
+    // todo => 获取活动信息
   },
   methods: {
     onSearch () {

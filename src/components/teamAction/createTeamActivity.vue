@@ -120,6 +120,7 @@ export default {
             // console.log(val.data)
             if (val.data.status === 200) {
               alert(JSON.stringify(val.data.message))
+              this.$router.replace('/team/activity')
             }
           }).catch(err => {
             console.log(err)

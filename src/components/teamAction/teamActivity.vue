@@ -77,6 +77,7 @@
     </template>
   </el-table-column>
 </el-table>
+<el-button type="info" @click="GoBackIndex">回到首页</el-button>
   </div>
 </template>
 
@@ -98,7 +99,7 @@ const tableContent = [
 
 export default {
   name: 'teamActivity',
-
+  inject: ['reload'],
   data () {
     return {
       userinfo: {
@@ -124,6 +125,7 @@ export default {
       },
       activityList: [],
       MyActivityName: '',
+      acti_id: '',
       buttonDisabled: false,
       DeleteDisabled: false,
       activityForm: tableContent,
@@ -131,15 +133,11 @@ export default {
     }
   },
   methods: {
+    GoBackIndex () {
+      this.$router.replace('/home')
+    },
     handleChat (index, row) {
       console.log(row)
-      // if (row.userid !== this.userinfo.userID) {
-      //   alert('你没有权限删除')
-      // }
-      // const ChatPerson = {
-      // userid: row.userid,
-      // username: row.username
-      // }
       alert('你要联系的活动发起者为' + row.username)
     },
     getMaxLength (arr) {
@@ -172,7 +170,30 @@ export default {
       this.$router.push('/team/createTeamAction')
     },
     DeleteTeamAction () {
-      console.log('撤销活动申请')
+      // console.log('撤销活动申请')
+      if (confirm('你是否真的要撤销活动：' + this.MyActivityName)) {
+        const token = localStorage.getItem('token')
+        const res = axios({
+          url: 'http://127.0.0.1:3030/team/deleteActivity',
+          method: 'post',
+          headers: { Authorization: token },
+          data: {
+            userid: this.userinfo.userID,
+            acti_name: this.MyActivityName,
+            acti_id: this.acti_id
+          }
+        })
+        res.then(res1 => {
+          if (res1.data.status === 200) {
+            console.log(res1.data)
+            this.reload()
+            alert('删除成功')
+          }
+        }).catch(
+          err1 => {
+            console.log(err1)
+          })
+      }
     }
   },
   created () {
@@ -180,7 +201,7 @@ export default {
     const token = localStorage.getItem('token')
     if (!token) {
       alert('无登陆信息，请点击立即登陆')
-      this.$router.replace('/login')
+      this.$router.replace('/user/login')
     } else {
       const url = 'http://127.0.0.1:3030/my/userinfo'
       const res = axios({
@@ -248,6 +269,7 @@ export default {
                 this.MyActivityName = ''
               } else {
                 this.MyActivityName = arrRes[0].acti_name
+                this.acti_id = arrRes[0].id
                 this.buttonDisabled = true
               }
 
