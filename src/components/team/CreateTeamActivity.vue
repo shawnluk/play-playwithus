@@ -6,10 +6,6 @@
         <el-input v-model="ruleForm.name"></el-input>
       </el-form-item>
       <el-form-item label="比赛区域" prop="region">
-        <!-- <el-select v-model="ruleForm.region" placeholder="请选择活动区域"> -->
-          <!-- <el-option label="区域一" value="shanghai"></el-option>
-          <el-option label="区域二" value="beijing"></el-option>
-        </el-select> -->
         <el-input v-model="ruleForm.region"></el-input>
       </el-form-item>
       <el-form-item label="比赛时间" required>
@@ -25,15 +21,11 @@
           </el-form-item>
         </el-col>
       </el-form-item>
-      <!-- <el-form-item label="即时配送" prop="delivery">
-        <el-switch v-model="ruleForm.delivery"></el-switch>
-      </el-form-item> -->
       <el-form-item label="比赛性质" prop="type" >
         <el-checkbox-group v-model="ruleForm.type" :max="1">
           <el-checkbox label="友谊赛" name="type"></el-checkbox>
           <el-checkbox label="联赛或杯赛" name="type"></el-checkbox>
           <el-checkbox label="自定义比赛" name="type"></el-checkbox>
-          <!-- <el-checkbox label="单纯品牌曝光" name="type"></el-checkbox> -->
         </el-checkbox-group>
       </el-form-item>
       <el-form-item label="比赛场地" prop="resource">
@@ -59,6 +51,7 @@ export default {
   data () {
     return {
       teamname: '',
+      teamID: '',
       ruleForm: {
         name: '',
         region: '',
@@ -111,17 +104,16 @@ export default {
               region: this.ruleForm.region,
               desc: this.ruleForm.desc,
               resource: this.ruleForm.resource,
-              teamname: this.teamname
+              teamname: this.teamname,
+              teamid: this.teamID
             },
             headers: { Authorization: token }
           })
 
           res1.then(val => {
             // console.log(val.data)
-            if (val.data.status === 200) {
-              alert(JSON.stringify(val.data.message))
-              this.$router.replace('/team/activity')
-            }
+            alert(JSON.stringify(val.data.message))
+            this.$router.replace('/team/activity')
           }).catch(err => {
             console.log(err)
           })
@@ -144,7 +136,8 @@ export default {
     })
     resAxios.then(val => {
       console.log(val.data)
-      this.teamname = val.data.teamname
+      this.teamname = val.data.teamName
+      this.teamID = val.data.teamID
     }).catch(err => {
       console.log(err)
     })

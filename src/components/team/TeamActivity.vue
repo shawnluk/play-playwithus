@@ -167,10 +167,14 @@ export default {
       if (this.userinfo.userID !== this.teamInfo.captainID) {
         return alert('你不是球队队长，不能创建活动')
       }
-      this.$router.push('/team/createTeamAction')
+      this.$router.push('/team/createTeamActivity')
     },
     DeleteTeamAction () {
       // console.log('撤销活动申请')
+      if (!this.MyActivityName) {
+        alert('乱点，你都没申请活动')
+        return
+      }
       if (confirm('你是否真的要撤销活动：' + this.MyActivityName)) {
         const token = localStorage.getItem('token')
         const res = axios({
@@ -184,11 +188,9 @@ export default {
           }
         })
         res.then(res1 => {
-          if (res1.data.status === 200) {
-            console.log(res1.data)
-            this.reload()
-            alert('删除成功')
-          }
+          console.log(res1.data)
+          // this.reload()
+          // alert('删除成功')
         }).catch(
           err1 => {
             console.log(err1)
@@ -209,82 +211,76 @@ export default {
         headers: { Authorization: token }
       })
       res.then(res1 => {
-        if (res1.data.status === 0) {
-          this.userinfo.userID = res1.data.data.id
-          this.userinfo.username = res1.data.data.username
-          this.userinfo.nickname = res1.data.data.nickname
-          this.userinfo.email = res1.data.data.email
-          this.userinfo.userpic = res1.data.data.userpic
-          this.teamInfo.teamName = res1.data.data.teamName
-          this.teamInfo.teamID = res1.data.data.teamID
+        this.userinfo.userID = res1.data.data.id
+        this.userinfo.username = res1.data.data.username
+        this.userinfo.nickname = res1.data.data.nickname
+        this.userinfo.email = res1.data.data.email
+        this.userinfo.userpic = res1.data.data.userpic
+        this.teamInfo.teamName = res1.data.data.teamName
+        this.teamInfo.teamID = res1.data.data.teamID
 
-          if (this.teamInfo.teamID !== null) {
-            const teamMemberRes = axios({
-              url: 'http://127.0.0.1:3030/team/memberlist',
-              method: 'post',
-              headers: { Authorization: token },
-              data: {
-                teamID: this.teamInfo.teamID
-              }
-            })
-            teamMemberRes.then(res3 => {
-              this.teamInfo.teamMemberList = res3.data.data.list1
-              this.teamInfo.joinTeam_memberList = res3.data.data.list2
-              this.teamInfo.teamCaptain = res3.data.data.list3[0].newCaptain
-              this.teamInfo.captainID = res3.data.data.list3[0].CaptainId
-              this.teamInfo.teamMemberList.splice(this.teamInfo.teamMemberList.findIndex(item => item.id === this.teamInfo.captainID), 1)
-
-              if (this.teamInfo.captainID !== this.userinfo.userID) {
-                this.DeleteDisabled = true
-              }
-            })
-          }
-          // 获取活动信息
-          const getActiRes = axios({
-            url: 'http://127.0.0.1:3030/team/getTeamActivity',
+        if (this.teamInfo.teamID !== null) {
+          const teamMemberRes = axios({
+            url: 'http://127.0.0.1:3030/team/memberlist',
             method: 'post',
-            headers: { Authorization: token }
-            // data: {
-            //   userID: this.userinfo.userID,
-            //   username: this.userinfo.username,
-            //   teamID: this.teamInfo.teamID,
-            //   teamName: this.teamInfo.teamName
-            // }
-          })
-
-          getActiRes.then((res2) => {
-            // console.log(res2.data)
-            if (res2.data.status === 200) {
-              // console.log(res2.data.ActiData)
-              this.activityList = res2.data.ActiData
-
-              console.log(this.activityList)
-              // const _this = this
-              // console.log(_this.userinfo)
-              const arrRes = this.activityList.filter((item, index) => {
-                return item.teamname === this.teamInfo.teamName
-              })
-              // console.log(arrRes)
-              if (arrRes.length === 0) {
-                this.MyActivityName = ''
-              } else {
-                this.MyActivityName = arrRes[0].acti_name
-                this.acti_id = arrRes[0].id
-                this.buttonDisabled = true
-              }
-
-              // console.log(this.MyActivityName)
-            } else {
-              console.log(res2)
+            headers: { Authorization: token },
+            data: {
+              teamID: this.teamInfo.teamID
             }
-          }).catch(err2 => {
-            console.log(err2)
+          })
+          teamMemberRes.then(res3 => {
+            this.teamInfo.teamMemberList = res3.data.data.list1
+            this.teamInfo.joinTeam_memberList = res3.data.data.list2
+            this.teamInfo.teamCaptain = res3.data.data.list3[0].newCaptain
+            this.teamInfo.captainID = res3.data.data.list3[0].CaptainId
+            this.teamInfo.teamMemberList.splice(this.teamInfo.teamMemberList.findIndex(item => item.id === this.teamInfo.captainID), 1)
+
+            if (this.teamInfo.captainID !== this.userinfo.userID) {
+              this.DeleteDisabled = true
+            }
+          }).catch(err3 => {
+            console.log('err3' + err3)
           })
         }
+        // 获取活动信息
+        const getActiRes = axios({
+          url: 'http://127.0.0.1:3030/team/getTeamActivity',
+          method: 'post',
+          headers: { Authorization: token }
+          // data: {
+          //   userID: this.userinfo.userID,
+          //   username: this.userinfo.username,
+          //   teamID: this.teamInfo.teamID,
+          //   teamName: this.teamInfo.teamName
+          // }
+        })
+
+        getActiRes.then((res2) => {
+          // console.log(res2.data)
+          // console.log(res2.data.ActiData)
+          this.activityList = res2.data.ActiData
+          console.log(this.activityList)
+          // const _this = this
+          // console.log(_this.userinfo)
+          const arrRes = this.activityList.filter((item, index) => {
+            return item.teamname === this.teamInfo.teamName
+          })
+          // console.log(arrRes)
+          if (arrRes.length === 0) {
+            this.MyActivityName = ''
+          } else {
+            this.MyActivityName = arrRes[0].acti_name
+            this.acti_id = arrRes[0].id
+            this.buttonDisabled = true
+          }
+          // console.log(this.MyActivityName)
+        }).catch(err2 => {
+          console.log('err2' + err2)
+        })
       }).catch(err => {
         console.log(err)
-        alert('载入页面出错，请重新登陆')
-        this.$router.replace('/login')
+        alert('载入页面出错，请重新登陆' + err)
+        this.$router.replace('/user/login')
       })
     }
     // getMaxLength()
@@ -292,7 +288,6 @@ export default {
   watch: {
     /**
          * 监控表格的数据data，自动设置表格宽度
-         * @param valArr
          */
     activityList (valArr) {
       const _this = this

@@ -163,7 +163,7 @@ export default {
         const picSrcArr = this.userinfo.userpic.split('\\').filter((item, index, array) => {
           return index > 0
         })
-        console.log(picSrcArr)
+        // console.log(picSrcArr)
         let str = ''
         for (const item of picSrcArr) {
           str += '/' + item
@@ -203,6 +203,7 @@ export default {
   // },
   methods: {
     async selectCaptain (selectCaptain) {
+      console.log(selectCaptain)
       const newCaptainObj = this.teamInfo.teamMemberList.filter(item => item.username === selectCaptain)
       const { data: res } = await axios.post('http://127.0.0.1:3030/team/quit', {
         userID: this.userinfo.userID,
@@ -219,7 +220,7 @@ export default {
       if (this.userinfo.userID !== this.teamInfo.captainID) {
         return alert('你不是球队队长，不能创建活动')
       }
-      this.$router.push('/team/createTeamAction')
+      this.$router.push('/team/createTeamActivity')
     },
     pwdChange () {
       // this.sendToSetPwd()
@@ -239,7 +240,8 @@ export default {
       }
       // console.log(res)
       if (confirm('你是否要退出球队：' + this.teamInfo.teamName)) {
-        if (this.userinfo.userID !== this.teamInfo.captainID) {
+        // console.log(this.teamMemberList)
+        if (this.userinfo.userID !== this.teamInfo.captainID || this.teamMemberList !== true) {
           const { data: res } = await axios.post('http://127.0.0.1:3030/team/quit', {
             userID: this.userinfo.userID,
             teamID: this.teamInfo.teamID
@@ -247,9 +249,9 @@ export default {
           if (res.status === 200) {
             this.teamInfo.teamName = ''
             alert(JSON.stringify(res))
+            this.reload()
           }
         }
-        this.el_popoverDisable = false
       } else {
         this.reload()
       }

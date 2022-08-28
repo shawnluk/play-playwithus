@@ -47,26 +47,28 @@ export default {
     },
     async upload () {
       // console.log('准备上传')
-      const token = localStorage.getItem('token')
-      // console.log(this.nickValue)
-      const { data: res1 } = await axios({
-        method: 'post',
-        headers: { Authorization: token },
-        url: 'http://127.0.0.1:3030/my/baseInfoSet',
-        data: {
-          nickname: this.nickValue,
-          email: this.emailValue
-        }
-      })
-      // console.log(res1)
       const confirmRes = confirm('你要更新的信息是：' + '昵称：' + this.nickValue + ' 邮箱：' + this.emailValue)
       if (confirmRes) {
-        alert(JSON.stringify(res1))
+        const token = localStorage.getItem('token')
+        // console.log(this.nickValue)
+        const { data: res1 } = await axios({
+          method: 'post',
+          headers: { Authorization: token },
+          url: 'http://127.0.0.1:3030/my/baseInfoSet',
+          data: {
+            nickname: this.nickValue,
+            email: this.emailValue
+          }
+        })
+        if (res1.status === 0) {
+          alert(JSON.stringify(res1))
+        } else {
+          console.log(res1)
+        }
       }
     },
     afterRead (file) {
       // console.log(file)
-
       file.status = 'uploading'
       file.message = '上传中...'
       if (!this.fileList[0].file.name) {
@@ -92,10 +94,9 @@ export default {
           axios.post(url, formData, {
             headers: { Authorization: token, enctype: 'multipart/form-data' }
           }).then(res => {
-            // console.log(res.data)
-            if (res.data.status === 0) {
-              alert(JSON.stringify(res.data))
-            }
+            // console.log(res.data) {
+            alert(JSON.stringify(res.data))
+            this.$router.replace('/my/userinfo')
           })
         }, 4000)
       }

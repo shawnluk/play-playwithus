@@ -4,34 +4,38 @@ import Home from '../views/Home/Home.vue'
 import Team from '../views/Team/Team.vue'
 import Stadium from '../views/Stadium/Stadium01.vue'
 import User from '../views/User/User.vue'
-import CreateTeam from '@/views/CreateTeam/CreateTeam.vue'
+import CreateTeam from '@/components/team/CreateTeam.vue'
 import UserLogin from '@/components/user/UserLogin.vue'
 import getUserinfo from '@/utils/getUserinfo'
 import UserInfo from '@/components/user/UserInfo.vue'
-import teamCreate from '@/components/teamAction/teamCreate.vue'
-import teamJoin from '@/components/teamAction/teamJoin.vue'
+import teamCreate from '@/components/team/TeamCreate.vue'
+import teamJoin from '@/components/team/TeamJoin.vue'
 import UserData from '@/components/user/UserData.vue'
-import setPassword from '@/components/user/setPassword.vue'
-import createTeamAction from '@/components/teamAction/createTeamActivity.vue'
-import teamActivity from '@/components/teamAction/teamActivity.vue'
+import setPassword from '@/components/user/SetPassword.vue'
+import createTeamActivity from '@/components/team/CreateTeamActivity.vue'
+import teamActivity from '@/components/team/TeamActivity.vue'
+import SetTeamInfo from '@/components/team/SetTeamInfo.vue'
+import TeamInfo from '@/components/team/TeamInfo.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
   { path: '/', redirect: '/home' },
   { path: '/home', component: Home, meta: { TabBarShow: true } },
-  { path: '/team', component: Team, meta: { TabBarShow: true } },
+  { path: '/teamList', component: Team, meta: { TabBarShow: true } },
   { path: '/stadium', component: Stadium, meta: { TabBarShow: true } },
   { path: '/user', component: User, meta: { TabBarShow: true } },
-  { path: '/CreateTeam', component: CreateTeam, meta: { TabBarShow: false } },
+  { path: '/team/create', component: CreateTeam, meta: { TabBarShow: false } },
   { path: '/user/login', component: UserLogin, meta: { TabBarShow: false } },
   { path: '/my/userinfo', component: UserInfo, meta: { TabBarShow: false } },
-  { path: '/team/create', component: teamCreate, meta: { TabBarShow: false } },
-  { path: '/team/join', component: teamJoin, meta: { TabBarShow: false } },
   { path: '/my/update', component: UserData, meta: { TabBarShow: false } },
   { path: '/my/setPassword', component: setPassword, meta: { TabBarShow: false } },
-  { path: '/team/createTeamAction', component: createTeamAction, meta: { TabBarShow: false } },
-  { path: '/team/activity', component: teamActivity, meta: { TabBarShow: false } }
+  { path: '/CreateTeam', component: teamCreate, meta: { TabBarShow: false } },
+  { path: '/team/join', component: teamJoin, meta: { TabBarShow: false } },
+  { path: '/team/createTeamActivity', component: createTeamActivity, meta: { TabBarShow: false } },
+  { path: '/team/activity', component: teamActivity, meta: { TabBarShow: false } },
+  { path: '/team/TeamInfo', component: TeamInfo, meta: { TabBarShow: false } },
+  { path: '/team/SetTeamInfo', component: SetTeamInfo, meta: { TabBarShow: false } }
 
 ]
 

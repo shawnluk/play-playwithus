@@ -25,7 +25,7 @@
       <van-cell title="当前赛事" value="查看活动" is-link to='team/activity' />
     </van-cell-group>
     <van-cell-group inset>
-      <van-cell title="我的球队" value="球队设置" is-link to='my/userinfo'>
+      <van-cell title="我的球队" value="球队设置" is-link to='team/TeamInfo'>
         <!-- 使用 title 插槽来自定义标题 -->
         <template #label>
           {{teamInfo.teamName}}
@@ -96,8 +96,8 @@ export default {
       })
       // console.log(res)
       res.then(res1 => {
-        console.log(res1)
-        if (res1.data.status === 0) {
+        console.log(res1.data)
+        if (res1.data.status === 200) {
           this.userinfo.userID = res1.data.data.id
           this.userinfo.username = res1.data.data.username
           this.userinfo.nickname = res1.data.data.nickname
@@ -138,16 +138,17 @@ export default {
           }
 
           if (this.userinfo.userpic !== null) {
-            const picSrcArr = this.userinfo.userpic.split('\\').filter((item, index, array) => {
-              return index > 0
-            })
-            // console.log(picSrcArr)
-            let str = ''
-            for (const item of picSrcArr) {
-              str += '/' + item
-            }
+            // const picSrcArr = this.userinfo.userpic.split('\\').filter((item, index, array) => {
+            //   return index > 0
+            // })
+            // // console.log(picSrcArr)
+            // let str = ''
+            // for (const item of picSrcArr) {
+            //   str += '/' + item
+            // }
 
-            const picUrl = 'http://127.0.0.1:3030' + str
+            // const picUrl = 'http://127.0.0.1:3030' + str
+            const picUrl = 'https://' + this.userinfo.userpic
             // console.log(picUrl)
             this.userinfo.picUrl = picUrl
             this.avatarShow = false
