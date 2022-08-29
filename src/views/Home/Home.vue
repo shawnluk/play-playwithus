@@ -4,7 +4,7 @@
     <div class="search_header">
       <div class="demo-type">
         <div>
-          <el-avatar icon="el-icon-user-solid" class="el-avatar"></el-avatar>
+          <el-avatar icon="el-icon-user-solid" class="el-avatar" :src='this.userinfo.picUrl'></el-avatar>
         </div>
       </div>
       <van-search v-model="value" placeholder="请输入搜索关键词"  />
@@ -19,11 +19,9 @@
       </van-swipe-item>
     </van-swipe>
     <div class="btn_wrap">
-      <!-- <button>我要组队</button>
-      <button>发布赛事</button> -->
       <el-row>
         <el-button size="medium" round @click="CreateTeam">我要组队</el-button>
-        <el-button size="medium" round>发布赛事</el-button>
+        <el-button size="medium" round @click="CreateTeamActivity">发布赛事</el-button>
       </el-row>
     </div>
     <van-notice-bar left-icon="volume-o" :text="notice_text" scrollable  delay=0 @replay ='replay' />
@@ -111,7 +109,28 @@ export default {
       newList: [],
       value: '',
       activityList: [],
-      notice_text: ''
+      notice_text: '',
+      userinfo: {
+        userID: '',
+        username: '',
+        password: '',
+        nickname: '',
+        email: '',
+        userpic: '',
+        picUrl: ''
+      },
+      teamInfo: {
+        teamName: '',
+        teamID: '',
+        joinStatus: false,
+        activeName: '0',
+        checkTeamMemberDisable: false,
+        teamMemberList: [],
+        joinTeam_memberList: [],
+        teamCaptain: '',
+        captainID: ''
+      }
+
     }
   },
   created () {
@@ -119,34 +138,56 @@ export default {
 
     // todo =>获取用户信息
     const token = localStorage.getItem('token')
-    // if (!token) {
-    //   alert('齐')
-    // }
-    // const UserRes = axios({
-    //   method: 'get',
-    //   url: 'http://127.0.0.1:3030/my/userinfo',
-    //   headers: { Authorization: token }
-    // })
-    // UserRes.then(res => {
-    //   console.log(res)
-    // }).catch(err => {
-    //   console.log(err)
-    // })
-
-    // todo => 获取球队信息
-
-    const getActiRes = axios({
-      url: 'http://127.0.0.1:3030/team/getTeamActivity',
-      method: 'post',
+    if (!token) {
+      console.log('create:token不存在')
+    }
+    const UserRes = axios({
+      method: 'get',
+      url: 'http://127.0.0.1:3030/my/userinfo',
       headers: { Authorization: token }
-      // data: {
-      //   userID: this.userinfo.userID,
-      //   username: this.userinfo.username,
-      //   teamID: this.teamInfo.teamID,
-      //   teamName: this.teamInfo.teamName
-      // }
+    })
+    UserRes.then(res => {
+      console.log(res)
+      this.userinfo.userID = res.data.data.id
+      this.userinfo.username = res.data.data.username
+      this.userinfo.nickname = res.data.data.nickname
+      this.userinfo.email = res.data.data.email
+      this.userinfo.userpic = res.data.data.userpic
+      this.teamInfo.teamName = res.data.data.teamName
+      this.teamInfo.teamID = res.data.data.teamID
+      if (this.userinfo.userpic !== null) {
+        const picUrl = 'https://' + this.userinfo.userpic
+        // console.log(picUrl)
+        this.userinfo.picUrl = picUrl
+        this.avatarShow = false
+      }
+      if (this.teamInfo.teamID !== null) {
+        const teamMemberRes = axios({
+          url: 'http://127.0.0.1:3030/team/memberlist',
+          method: 'post',
+          headers: { Authorization: token },
+          data: {
+            teamID: this.teamInfo.teamID
+          }
+        })
+
+        teamMemberRes.then(res3 => {
+          // this.teamInfo.teamMemberList = res3.data.data.list1
+          // this.teamInfo.joinTeam_memberList = res3.data.data.list2
+          this.teamInfo.teamCaptain = res3.data.data.list3[0].newCaptain
+          this.teamInfo.captainID = res3.data.data.list3[0].CaptainId
+          // this.teamInfo.teamMemberList.splice(this.teamInfo.teamMemberList.findIndex(item => item.id === this.teamInfo.captainID), 1)
+        })
+      }
+    }).catch(err => {
+      console.log(err)
     })
 
+    // todo => 获取活动信息
+
+    const getActiRes = axios({
+      url: 'http://127.0.0.1:3030/team/getTeamActivity'
+    })
     getActiRes.then((res2) => {
       // console.log(res2.data)
       // console.log(res2.data.ActiData)
@@ -156,27 +197,12 @@ export default {
         '活动日期:': this.activityList[0].acti_date
       }
       this.notice_text = JSON.stringify(newObj)
-
       console.log(this.activityList)
-      // const _this = this
-      // console.log(_this.userinfo)
-      // const arrRes = this.activityList.filter((item, index) => {
-      //   return item.teamname === this.teamInfo.teamName
-      // })
-      // console.log(arrRes)
-      // if (arrRes.length === 0) {
-      //   this.MyActivityName = ''
-      // } else {
-      //   this.MyActivityName = arrRes[0].acti_name
-      //   this.acti_id = arrRes[0].id
-      //   this.buttonDisabled = true
-      // }
-      // console.log(this.MyActivityName)
     }).catch(err2 => {
       console.log('err2' + err2)
     })
 
-    // todo => 获取活动信息
+    // todo => 获取球队列表信息
   },
   methods: {
     handleEdit (index, row) {
@@ -194,6 +220,9 @@ export default {
       // console.log(this.newList)
     },
     CreateTeam () {
+      if (this.teamInfo.teamName !== null) {
+        return alert('已加入球队，不能再申请创建或加入其他球队')
+      }
       this.$router.push('/team/Create')
     },
     testArr () {
@@ -211,6 +240,27 @@ export default {
     replay () {
       // console.log('hello')
       setTimeout(this.testArr, 755 % 60 * 1000)
+    },
+    CreateTeamActivity () {
+      if (!this.userinfo.userID) {
+        return alert('请先登录')
+      }
+      if (this.userinfo.userID !== this.teamInfo.captainID) {
+        return alert('你不是球队队长，不能创建活动')
+      }
+      if (!this.teamInfo.teamID) {
+        return alert('你未加入任何球队，不能发起赛事活动')
+      }
+      // if ()
+      const teamNameRes = this.activityList.filter(item => {
+        return item.teamname === this.teamInfo.teamName
+      })
+      console.log(teamNameRes.length)
+      if (teamNameRes.length !== 0) {
+        return alert('你的球队已经创建了活动')
+      }
+      // console.log('可以创建')
+      this.$router.push('/team/createTeamActivity')
     }
   }
 }

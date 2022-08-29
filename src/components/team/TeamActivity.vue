@@ -245,8 +245,8 @@ export default {
         // 获取活动信息
         const getActiRes = axios({
           url: 'http://127.0.0.1:3030/team/getTeamActivity',
-          method: 'post',
-          headers: { Authorization: token }
+          method: 'get'
+          // headers: { Authorization: token }
           // data: {
           //   userID: this.userinfo.userID,
           //   username: this.userinfo.username,
