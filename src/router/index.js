@@ -4,13 +4,12 @@ import Home from '../views/Home/Home.vue'
 import Team from '../views/Team/Team.vue'
 import Stadium from '../views/Stadium/Stadium01.vue'
 import User from '../views/User/User.vue'
-import CreateTeam from '@/components/team/CreateTeam.vue'
+import CreateTeam from '@/components/team/TeamCreate.vue'
 import UserLogin from '@/components/user/UserLogin.vue'
 import getUserinfo from '@/utils/getUserinfo'
 import UserInfo from '@/components/user/UserInfo.vue'
-import teamCreate from '@/components/team/TeamCreate.vue'
 import teamJoin from '@/components/team/TeamJoin.vue'
-import UserData from '@/components/user/UserData.vue'
+import UserData from '@/components/user/SetUserData.vue'
 import setPassword from '@/components/user/SetPassword.vue'
 import createTeamActivity from '@/components/team/CreateTeamActivity.vue'
 import teamActivity from '@/components/team/TeamActivity.vue'
@@ -30,7 +29,6 @@ const routes = [
   { path: '/my/userinfo', component: UserInfo, meta: { TabBarShow: false } },
   { path: '/my/update', component: UserData, meta: { TabBarShow: false } },
   { path: '/my/setPassword', component: setPassword, meta: { TabBarShow: false } },
-  { path: '/CreateTeam', component: teamCreate, meta: { TabBarShow: false } },
   { path: '/team/join', component: teamJoin, meta: { TabBarShow: false } },
   { path: '/team/createTeamActivity', component: createTeamActivity, meta: { TabBarShow: false } },
   { path: '/team/activity', component: teamActivity, meta: { TabBarShow: false } },

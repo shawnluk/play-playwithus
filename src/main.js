@@ -7,6 +7,7 @@ import 'vant/lib/index.css'
 import router from './router'
 import BaiduMap from 'vue-baidu-map'
 import Plugin from 'v-fit-columns'
+import API from './api/index'
 
 Vue.use(Plugin)
 Vue.use(ElementUI)
@@ -16,6 +17,7 @@ Vue.use(BaiduMap, {
 })
 
 Vue.config.productionTip = false
+Vue.prototype.$API = API
 
 new Vue({
   router,

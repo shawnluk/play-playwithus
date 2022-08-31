@@ -48,7 +48,10 @@
 </template>
 
 <script>
-import axios from 'axios'
+// import axios from 'axios'
+// import { getUserInfo } from '@/api/user.js'
+// import { getTeamInfo, getTeamJoinStatus } from '@/api/team.js'
+// import { getActivity } from '@/api/activity.js'
 
 export default {
   name: 'User',
@@ -65,7 +68,7 @@ export default {
         password: '',
         nickname: '',
         email: '',
-        userpic: '',
+        userPic: '',
         picUrl: ''
       },
       teamInfo: {
@@ -77,116 +80,87 @@ export default {
         teamMemberList: [],
         joinTeam_memberList: [],
         teamCaptain: '',
-        captainID: ''
+        captainID: '',
+        teamPic: ''
         // selectCaptain: ''
       }
 
     }
   },
   created () {
-    const token = localStorage.getItem('token')
-    if (!token) {
-      // this.$router.push('/user/login')
-      alert('无登陆信息，请点击立即登陆')
-    } else {
-      const url = 'http://127.0.0.1:3030/my/userinfo'
-      const res = axios({
-        url,
-        headers: { Authorization: token }
-      })
-      // console.log(res)
-      res.then(res1 => {
-        console.log(res1.data)
-        if (res1.data.status === 200) {
-          this.userinfo.userID = res1.data.data.id
-          this.userinfo.username = res1.data.data.username
-          this.userinfo.nickname = res1.data.data.nickname
-          this.userinfo.email = res1.data.data.email
-          this.userinfo.userpic = res1.data.data.userpic
-          this.teamInfo.teamName = res1.data.data.teamName
-          this.teamInfo.teamID = res1.data.data.teamID
+    /* 获取用户信息 */
+    this.$API.user.getUserInfo().then(resUser => {
+      if (resUser.data.status === 200) {
+        console.log(resUser.data)
+        this.userinfo.userID = resUser.data.userData.id
+        this.userinfo.username = resUser.data.userData.username
+        this.userinfo.nickname = resUser.data.userData.nickname
+        this.userinfo.email = resUser.data.userData.email
+        this.userinfo.userPic = resUser.data.userData.userPic
 
-          if (this.userinfo.username) {
-            this.loginShow = false
-          }
-
-          if (this.teamInfo.teamID !== null) {
-            const teamMemberRes = axios({
-              url: 'http://127.0.0.1:3030/team/memberlist',
-              method: 'post',
-              headers: { Authorization: token },
-              data: {
-                teamID: this.teamInfo.teamID
-              }
-            })
-
-            teamMemberRes.then(res3 => {
-              this.teamInfo.teamMemberList = res3.data.data.list1
-              this.teamInfo.joinTeam_memberList = res3.data.data.list2
-              this.teamInfo.teamCaptain = res3.data.data.list3[0].newCaptain
-              this.teamInfo.captainID = res3.data.data.list3[0].CaptainId
-              this.teamInfo.teamMemberList.splice(this.teamInfo.teamMemberList.findIndex(item => item.id === this.teamInfo.captainID), 1)
-
-              // if (this.userinfo.userID === this.teamInfo.captainID) {
-              //   this.el_popoverDisable = false
-              // }
-            })
-          }
-
-          if (res1.data.data.teamID === null) {
-            this.teamInfo.checkTeamMemberDisable = true
-          }
-
-          if (this.userinfo.userpic !== null) {
-            // const picSrcArr = this.userinfo.userpic.split('\\').filter((item, index, array) => {
-            //   return index > 0
-            // })
-            // // console.log(picSrcArr)
-            // let str = ''
-            // for (const item of picSrcArr) {
-            //   str += '/' + item
-            // }
-
-            // const picUrl = 'http://127.0.0.1:3030' + str
-            const picUrl = 'https://' + this.userinfo.userpic
-            // console.log(picUrl)
-            this.userinfo.picUrl = picUrl
-            this.avatarShow = false
-          }
-
-          if (this.teamInfo.teamName === null) {
-            // console.log(token)
-            // console.log('还没申请球队，准备查看申请状态')
-            const url = 'http://127.0.0.1:3030/team/joinstatus'
-            const res2 = axios.post(url, { userID: this.userinfo.userID, username: this.userinfo.username })
-            res2.then(res2 => {
-              // console.log(res2.data.message)
-              if (res2.data.message.joinStatus === 1) {
-                this.teamInfo.teamName = res2.data.message.teamName + '(等待申请通过)'
-                // console.log('正在申请球队')
-                this.teamInfo.joinStatus = true
-                this.teamInfo.teamID = res2.data.message.teamID
-                // console.log(this.joinStatus)
-              }
-              if (res2.data.message.joinStatus === 0) {
-                this.teamInfo.teamName = null
-                this.teamInfo.joinStatus = false
-              }
-            })
-          }
+        // 拼接用户头像src
+        if (this.userinfo.userPic !== null) {
+          const picUrl = 'https://' + this.userinfo.userPic
+          this.userinfo.picUrl = picUrl
+          this.avatarShow = false
         }
-        if (res1.data.status === 403) {
-          alert(JSON.stringify(res1.data))
-        }
-      })
-      // .catch((err) => {
-      //   console.log(err)
-      //   Object.assign(this.$data, this.$options.data())
-      //   // localStorage.removeItem('token')
-      // })
-    }
+        return
+      }
+      console.log(resUser.data)
+    }).catch(errUser => {
+      console.log('获取用户信息失败' + errUser)
+    })
 
-    // 获取teamMemBer list
+    /* 获取用户所在球队信息 */
+    this.$API.team.getTeamInfo().then(resTeam => {
+      // 已经加入球队
+      if (resTeam.data.status === 200) {
+        console.log(resTeam.data)
+        this.teamInfo.teamName = resTeam.data.teamInfo[0].teamName
+        this.teamInfo.teamID = resTeam.data.teamInfo[0].teamID
+        this.teamInfo.teamCaptain = resTeam.data.teamInfo[0].newCaptain
+        this.teamInfo.captainID = resTeam.data.teamInfo[0].CaptainID
+        return
+      }
+      // 处于球队加入申请状态
+      if (resTeam.data.status === 201) {
+        this.$API.team.getTeamJoinStatus().then(resJoin => {
+          if (resJoin.data.status === 200) {
+            console.log(resJoin.data)
+            this.teamInfo.teamName = resJoin.data.joinData.teamName + '（等待队长同意加入申请）'
+            this.teamInfo.teamID = resJoin.data.joinData.teamID
+            return
+          }
+          if (resJoin.data.status === 201) {
+            return console.log(resJoin.data)
+          }
+          console.log(resJoin.data)
+        }).catch(errJoin => {
+          console.log('获取球队申请状态失败' + errJoin)
+        })
+        return
+      }
+      console.log(resTeam.data)
+    }).catch(errTeam => {
+      console.log('获取球队信息失败' + errTeam)
+    })
+
+    // if (this.userinfo.userPic !== null) {
+    //   // const picSrcArr = this.userinfo.userPic.split('\\').filter((item, index, array) => {
+    //   //   return index > 0
+    //   // })
+    //   // // console.log(picSrcArr)
+    //   // let str = ''
+    //   // for (const item of picSrcArr) {
+    //   //   str += '/' + item
+    //   // }
+
+    //   // const picUrl = 'http://127.0.0.1:3030' + str
+    //   const picUrl = 'https://' + this.userinfo.userPic
+    //   // console.log(picUrl)
+    //   this.userinfo.picUrl = picUrl
+    //   this.avatarShow = false
+    // }
   },
   methods: {
     logOut () {
@@ -196,53 +170,6 @@ export default {
     },
     ToLogin () {
       this.$router.push('/user/login')
-      // const _this = this
-      // if (!localStorage.getItem('token')) {
-      // } else {
-      //   const oldToken = localStorage.getItem('token')
-      //   const url = 'http://127.0.0.1:3030/my/userinfo'
-      //   async function getToken () {
-      //     const { data: res } = await axios({
-      //       method: 'get',
-      //       url: url,
-      //       headers: { Authorization: oldToken }
-      //     })
-      //     if (res.status === 0) {
-      //       _this.$router.push('/my/userinfo')
-      // console.log(res.data)
-      // console.log('登陆成功')
-      // _this.userInfo.username = res.data.username
-      // _this.userInfo.teamName = res.data.teamName
-      // this.userInfo.userpic = res.data.userpic
-      // const picSrcArr = res.data.userpic.split('\\').filter((item, index, array) => {
-      //   return index > 0
-      // })
-      // // console.log(picSrcArr)
-      // let str = ''
-      // for (const item of picSrcArr) {
-      //   str += '/' + item
-      // }
-
-      // const picUrl = 'http://127.0.0.1:3030' + str
-      // // console.log(picUrl)
-      // _this.userInfo.userpic = picUrl
-
-      // if (_this.userInfo.username) {
-      //   _this.loginShow = false
-      // }
-      // }
-      // if (res.status === 403) {
-      // alert({
-      //   message:res.message,
-      //   status：res.status
-      // })
-      // console.log(res.message)
-      //   alert(JSON.stringify(res))
-      //   _this.$router.push('/user/login')
-      // }
-      // }
-      // getToken()
-      // }
     }
   }
 }

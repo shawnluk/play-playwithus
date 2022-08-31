@@ -1,42 +1,41 @@
 <template>
   <div>
-    <h5>球队信息页面</h5>
-    <div>球队：{{teamInfo.teamName}}</div>
+
+    <div>用户名：{{userinfo.username}}</div>
+    <div>{{userinfo.password}}</div>
+    <div>昵称：{{userinfo.nickname}}</div>
+    <div>邮箱：{{userinfo.email}}</div>
+
     <div class="pic">
       头像：
-      <img :src='teamInfo.teamPic' alt="">
+      <img :src='userinfo.picUrl' alt="">
     </div>
+    <!-- <div>球队ID:{{teamID}}</div> -->
+    <div>球队：{{teamInfo.teamName}}</div>
+    <el-button  type="button" class="btn btn-primary" @click="updateData">更新个人资料</el-button>
+    <el-button  type="button" class="btn btn-primary" @click="pwdChange">更改密码</el-button>
     <el-button  type="button" class="btn btn-primary" @click="createTeam">创建我的球队</el-button>
     <el-button  type="button" class="btn btn-primary" @click="joinTeam">加入球队</el-button>
-    <el-button  type="button" class="btn btn-primary" @click="createTeamAction">查看活动</el-button>
+    <el-button  type="button" class="btn btn-primary" @click="createTeamAction">创建活动</el-button>
     <el-button  type="button" class="btn btn-primary" @click="DeleteTeamJoin">撤销申请</el-button>
-    <el-button  type="button" class="btn btn-primary" @click="setTeamInfo">修改球队资料</el-button>
-    <!-- <el-button> -->
+    <el-button  type="button" class="btn btn-primary" @click="logOut">退出登陆</el-button>
     <el-popover
-    placement="right"
-    width="400"
-    trigger="click"
-    :disabled='el_popoverDisable'
+      placement="right"
+      width="400"
+      trigger="click"
+      :disabled='el_popoverDisable'>
 
-    >
-    <!-- <el-table :data="teamInfo.teamMemberList">
-      <el-table-column width="150" property="id" label="id"></el-table-column>
-      <el-table-column width="100" property="username" label="姓名"></el-table-column>
-    </el-table> -->
-      <el-select v-model="value" placeholder="请先选择新队长" @change='selectCaptain'>
-        <el-option
-          v-for="item in teamInfo.teamMemberList"
-          :key="item.id"
-          :label="item.username"
-          :value="item.username"
-          >
-        </el-option>
-      </el-select>
-      <el-button  slot="reference" @click="QuitTeam" type="button" class="btn btn-primary">
-        退出球队
-      </el-button>
+        <el-select v-model="value" placeholder="请先选择新队长" @change = 'selectCaptain'>
+          <el-option
+            v-for="item in teamInfo.teamMemberList"
+            :key="item.id"
+            :label="item.username"
+            :value="item.username"
+            >
+          </el-option>
+        </el-select>
+      <el-button slot="reference" @click="QuitTeam" type="button" class="btn btn-primary">退出球队</el-button>
     </el-popover>
-    <!-- </el-button> -->
     <van-collapse v-model="teamInfo.activeName" accordion >
       <van-collapse-item title="查看我的球队成员"
       name="1"
@@ -60,11 +59,8 @@
 <script>
 
 import axios from 'axios'
-// import { getUserInfo } from '@/api/user.js'
-// import { getTeamInfo, getTeamJoinStatus } from '@/api/team.js'
 
 export default {
-  name: 'TeamInfo',
   inject: ['reload'],
   data () {
     return {
@@ -86,9 +82,7 @@ export default {
         teamMemberList: [],
         joinTeam_memberList: [],
         teamCaptain: '',
-        captainID: '',
-        teamPic: ''
-        // selectCaptain: ''
+        captainID: ''
       },
       el_popoverDisable: true,
       value: ''
@@ -103,7 +97,7 @@ export default {
     })
     // console.log(res)
     res.then(res1 => {
-      console.log(res1.data)
+      console.log(res1)
       this.userinfo.userID = res1.data.data.id
       this.userinfo.username = res1.data.data.username
       this.userinfo.nickname = res1.data.data.nickname
@@ -111,27 +105,8 @@ export default {
       this.userinfo.userPic = res1.data.data.userPic
       this.teamInfo.teamName = res1.data.data.teamName
       this.teamInfo.teamID = res1.data.data.teamID
-      // this.teamInfo.teamPic = res1.data.data.teamPic
 
       if (this.teamInfo.teamID !== null) {
-        /* 获取球队信息 */
-
-        const teamInfoRes = axios('http://127.0.0.1:3030/team/teaminfo', { headers: { Authorization: token } })
-        // console.log(teamInfoRes)
-        teamInfoRes.then(val => {
-          console.log(val.data)
-          this.teamInfo.teamCaptain = val.data.teamInfo[0].newCaptain
-          this.teamInfo.captainID = val.data.teamInfo[0].CaptainID
-          this.teamInfo.teamPic = 'https://' + val.data.teamInfo[0].teamPic
-          // if (this.userinfo.userID === this.teamInfo.captainID) {
-          //   this.el_popoverDisable = false
-          // }
-        }).catch(err => {
-          console.log(err)
-        })
-
-        /* 获取球员信息 */
-
         const teamMemberRes = axios({
           url: 'http://127.0.0.1:3030/team/memberlist',
           method: 'post',
@@ -142,19 +117,31 @@ export default {
         })
 
         teamMemberRes.then(res3 => {
-          console.log(res3.data)
           this.teamInfo.teamMemberList = res3.data.data.list1
           this.teamInfo.joinTeam_memberList = res3.data.data.list2
+          this.teamInfo.teamCaptain = res3.data.data.list3[0].newCaptain
+          this.teamInfo.captainID = res3.data.data.list3[0].CaptainId
           this.teamInfo.teamMemberList.splice(this.teamInfo.teamMemberList.findIndex(item => item.id === this.teamInfo.captainID), 1)
-
-          if (this.teamInfo.teamMemberList.length !== 0) {
-            this.el_popoverDisable = false
-          }
         })
       }
 
       if (res1.data.data.teamID === null) {
         this.teamInfo.checkTeamMemberDisable = true
+      }
+
+      if (this.userinfo.userPic !== null) {
+        const picSrcArr = this.userinfo.userPic.split('\\').filter((item, index, array) => {
+          return index > 0
+        })
+        // console.log(picSrcArr)
+        let str = ''
+        for (const item of picSrcArr) {
+          str += '/' + item
+        }
+
+        const picUrl = 'http://127.0.0.1:3030' + str
+        // console.log(picUrl)
+        this.userinfo.picUrl = picUrl
       }
 
       if (this.teamInfo.teamName === null) {
@@ -178,6 +165,8 @@ export default {
         })
       }
     })
+
+    // 获取teamMemBer list
   },
   // beforeDestroy () {
   //   bus.$emit('share', this.username)
@@ -198,10 +187,18 @@ export default {
       }
     },
     createTeamAction () {
-      // if (this.userinfo.userID !== this.teamInfo.captainID) {
-      //   return alert('你不是球队队长，不能创建活动')
-      // }
-      this.$router.push('/team/Activity')
+      if (this.userinfo.userID !== this.teamInfo.captainID) {
+        return alert('你不是球队队长，不能创建活动')
+      }
+      this.$router.push('/team/createTeamActivity')
+    },
+    pwdChange () {
+      // this.sendToSetPwd()
+      this.$router.push('/my/setPassword')
+    },
+    updateData () {
+      console.log('准备更新个人资料')
+      this.$router.push('/my/update')
     },
     async QuitTeam () {
       // this.el_popoverDisable = true
@@ -211,8 +208,10 @@ export default {
       if (this.teamInfo.teamName === null) {
         return alert('你还未加入任何球队')
       }
+      // console.log(res)
       if (confirm('你是否要退出球队：' + this.teamInfo.teamName)) {
-        if (this.userinfo.userID !== this.teamInfo.captainID) {
+        // console.log(this.teamMemberList)
+        if (this.userinfo.userID !== this.teamInfo.captainID || this.teamMemberList !== true) {
           const { data: res } = await axios.post('http://127.0.0.1:3030/team/quit', {
             userID: this.userinfo.userID,
             teamID: this.teamInfo.teamID
@@ -221,20 +220,6 @@ export default {
             this.teamInfo.teamName = ''
             alert(JSON.stringify(res))
             this.reload()
-          }
-        }
-        if (this.userinfo.userID === this.teamInfo.captainID && this.teamInfo.teamMemberList.length === 0) {
-          if (confirm('此操作是要删除球队：' + this.teamInfo.teamName)) {
-            const token = localStorage.getItem('token')
-            const { data: res } = await axios.post('http://127.0.0.1:3030/team/delete', {}, {
-              // userID: this.userinfo.userID,
-              // teamID: this.teamInfo.teamID
-              headers: { Authorization: token }
-            })
-            if (res.status === 200) {
-              alert(JSON.stringify(res))
-              this.reload()
-            }
           }
         }
       } else {
@@ -276,14 +261,10 @@ export default {
 
       this.$router.push('/team/create')
     },
-    setTeamInfo () {
-      if (this.teamInfo.teamName === null) {
-        return alert('你还未加入任何球队')
-      }
-      if (this.userinfo.userID !== this.teamInfo.captainID) {
-        return alert('你不是球队队长，不能修改球队资料')
-      }
-      this.$router.push('/team/SetTeamInfo')
+    logOut () {
+      // console.log('准备退出登陆')
+      localStorage.removeItem('token')
+      this.$router.push('/user/login')
     }
   }
 }
@@ -297,7 +278,5 @@ export default {
       // display: none;
     }
   }
-  .el-popover__reference{
-    margin-left: 10px;
-  }
+
 </style>

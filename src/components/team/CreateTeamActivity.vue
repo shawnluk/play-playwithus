@@ -50,7 +50,7 @@ import axios from 'axios'
 export default {
   data () {
     return {
-      teamname: '',
+      teamName: '',
       teamID: '',
       ruleForm: {
         name: '',
@@ -104,8 +104,8 @@ export default {
               region: this.ruleForm.region,
               desc: this.ruleForm.desc,
               resource: this.ruleForm.resource,
-              teamname: this.teamname,
-              teamid: this.teamID
+              teamName: this.teamName,
+              teamID: this.teamID
             },
             headers: { Authorization: token }
           })
@@ -136,7 +136,7 @@ export default {
     })
     resAxios.then(val => {
       console.log(val.data)
-      this.teamname = val.data.teamName
+      this.teamName = val.data.teamName
       this.teamID = val.data.teamID
     }).catch(err => {
       console.log(err)

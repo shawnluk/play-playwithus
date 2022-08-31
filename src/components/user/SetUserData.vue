@@ -5,17 +5,6 @@
       <van-field v-model="nickValue" label="昵称" placeholder="请输入你的昵称" />
       <van-field v-model="emailValue" label="邮箱" placeholder="请输入你的邮箱" />
     </van-cell-group>
-    <!-- <el-upload
-      class="avatar-uploader"
-      action='http://127.0.0.1:3030/my/setPic'
-      :show-file-list="true"
-      :on-success="handleAvatarSuccess"
-      :before-upload="beforeAvatarUpload"
-      >
-      <img v-if="imageUrl" :src="imageUrl" class="avatar">
-      <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-    </el-upload> -->
-    <!-- <van-uploader v-model="fileList" :after-read="afterRead" :before-read="beforeRead" :max-count="1"  /> -->
     <button type="button" class="btn btn-primary" @click="upload">确定修改个人资料</button>
     <van-cell is-link @click="uploadPic">上传头像</van-cell>
     <van-popup v-model="show" position="bottom" :style="{ height: '30%' }" class="popup">
@@ -25,13 +14,14 @@
         </div> -->
       </van-uploader>
     </van-popup>
-    <!-- <button type="button" class="btn btn-primary" @click="uploadPic" >上传头像</button> -->
+    <button type="button" class="btn btn-primary" @click="toUserinfo" >回到用户中心</button>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
 import { Toast } from 'vant'
+
 export default {
   data () {
     return {
@@ -45,28 +35,26 @@ export default {
     uploadPic () {
       this.show = true
     },
-    async upload () {
-      // console.log('准备上传')
+
+    upload () {
       const confirmRes = confirm('你要更新的信息是：' + '昵称：' + this.nickValue + ' 邮箱：' + this.emailValue)
       if (confirmRes) {
-        const token = localStorage.getItem('token')
-        // console.log(this.nickValue)
-        const { data: res1 } = await axios({
-          method: 'post',
-          headers: { Authorization: token },
-          url: 'http://127.0.0.1:3030/my/baseInfoSet',
-          data: {
-            nickname: this.nickValue,
-            email: this.emailValue
-          }
-        })
-        if (res1.status === 0) {
-          alert(JSON.stringify(res1))
-        } else {
-          console.log(res1)
+        const data = {
+          nickname: this.nickValue,
+          email: this.emailValue
         }
+        this.$API.user.setUserInfo(data).then(resSetUser => {
+          if (resSetUser.data.status !== 200) {
+            return console.log(resSetUser.data)
+          }
+          console.log(resSetUser.data)
+          alert(JSON.stringify(resSetUser.data))
+        }).catch(errSetUser => {
+          console.log('修改用户信息失败' + errSetUser)
+        })
       }
     },
+
     afterRead (file) {
       // console.log(file)
       file.status = 'uploading'
@@ -86,60 +74,39 @@ export default {
             this.fileList = []
             return
           }
-          const token = localStorage.getItem('token')
-          const url = 'http://127.0.0.1:3030/my/setPic'
+
           const formData = new FormData()
           formData.append('avatar', file.file)
-          // console.log(formData.get('avatar'))
+          // this.$API.user.setUserPic(formData).then(resUserPic => {
+          //   console.log(resUserPic.data)
+          // }).catch(errUserPic => {
+          //   console.log(errUserPic)
+          // })
+
+          const token = localStorage.getItem('token')
+          const url = 'http://127.0.0.1:3030/my/setPic'
+
           axios.post(url, formData, {
             headers: { Authorization: token, enctype: 'multipart/form-data' }
           }).then(res => {
             // console.log(res.data) {
             alert(JSON.stringify(res.data))
-            this.$router.replace('/my/userinfo')
+            // this.$router.replace('/my/userinfo')
           })
         }, 4000)
       }
     },
     beforeRead (file) {
-      // console.log(file)
-      if (file.type !== 'image/jpeg') {
-        Toast('请上传 jpg 格式图片')
+      console.log(file)
+      if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
+        Toast('请上传 jpg 或 png 格式图片')
         return false
       }
       return true
+    },
+    toUserinfo () {
+      this.$router.replace('/my/userinfo')
     }
-    // -----------------------
-    //  返回promise
-    // asyncBeforeRead(file) {
-    //   return new Promise((resolve, reject) => {
-    //     if (file.type !== 'image/jpeg') {
-    //       Toast('请上传 jpg 格式图片');
-    //       reject();
-    //     } else {
-    //       let img = new File(['foo'], 'bar.jpg', {
-    //         type: 'image/jpeg',
-    //       });
-    //       resolve(img);
-    //     }
-    //   });
-    // },
-    // -----------------------
-    // handleAvatarSuccess (res, file) {
-    //   this.imageUrl = URL.createObjectURL(file.raw)
-    // },
-    // beforeAvatarUpload (file) {
-    //   const isJPG = file.type === 'image/jpeg'
-    //   const isLt2M = file.size / 1024 / 1024 < 2
-
-    //   if (!isJPG) {
-    //     this.$message.error('上传头像图片只能是 JPG 格式!')
-    //   }
-    //   if (!isLt2M) {
-    //     this.$message.error('上传头像图片大小不能超过 2MB!')
-    //   }
-    //   return isJPG && isLt2M
-    // }
   }
 }
 </script>

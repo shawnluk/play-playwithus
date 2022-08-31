@@ -92,7 +92,6 @@ export default {
       // return [
       //   { value: '三全鲜食（北新泾店）', address: '长宁区新渔路144号' },
       // ]
-      // console.log('开始发起axios请求')
       const { data: res } = await axios({
         url: 'http://127.0.0.1:3030/team/join',
         method: 'get'

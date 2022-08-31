@@ -4,6 +4,7 @@
     <el-button  type="button" class="btn btn-primary" @click="createTeamAction" :disabled='buttonDisabled'>创建我的活动</el-button>
     <el-button  type="danger" class="btn btn-primary" @click="DeleteTeamAction" :disabled='DeleteDisabled' plain>撤销活动申请</el-button>
     <div>
+      <p>我的球队名称:   {{this.teamInfo.teamName}}</p>
       <p>我的球队活动:   {{this.MyActivityName}}</p>
     </div>
       <!-- <el-table
@@ -24,7 +25,7 @@
 
     <!-- </el-table-column>
     <el-table-column
-      prop="teamname"
+      prop="teamName"
       label="球队名称"
     >
     </el-table-column>
@@ -61,7 +62,7 @@
       :key="item.prop"
       :label="item.label"
       :width="item.width"
-      :prop="item.prop === 'acti_date' ? 'acti_date':null || item.prop === 'teamname' ? 'teamname':null"
+      :prop="item.prop === 'acti_date' ? 'acti_date':null || item.prop === 'teamName' ? 'teamName':null"
     >
     <template slot-scope="scope">
       {{ scope.row[item.prop] }}
@@ -89,7 +90,7 @@ import axios from 'axios'
 const tableContent = [
   // { label: '序号', prop: 'id' },
   { label: '日期', prop: 'acti_date' },
-  { label: '球队名称', prop: 'teamname' },
+  { label: '球队名称', prop: 'teamName' },
   { label: '创建者', prop: 'username' },
   { label: '地址', prop: 'acti_region' },
   { label: '比赛类型', prop: 'acti_type' },
@@ -108,7 +109,7 @@ export default {
         password: '',
         nickname: '',
         email: '',
-        userpic: '',
+        userPic: '',
         picUrl: ''
       },
       teamInfo: {
@@ -182,7 +183,7 @@ export default {
           method: 'post',
           headers: { Authorization: token },
           data: {
-            userid: this.userinfo.userID,
+            userID: this.userinfo.userID,
             acti_name: this.MyActivityName,
             acti_id: this.acti_id
           }
@@ -215,57 +216,40 @@ export default {
         this.userinfo.username = res1.data.data.username
         this.userinfo.nickname = res1.data.data.nickname
         this.userinfo.email = res1.data.data.email
-        this.userinfo.userpic = res1.data.data.userpic
+        this.userinfo.userPic = res1.data.data.userPic
         this.teamInfo.teamName = res1.data.data.teamName
         this.teamInfo.teamID = res1.data.data.teamID
 
         if (this.teamInfo.teamID !== null) {
-          const teamMemberRes = axios({
-            url: 'http://127.0.0.1:3030/team/memberlist',
-            method: 'post',
-            headers: { Authorization: token },
-            data: {
-              teamID: this.teamInfo.teamID
-            }
-          })
-          teamMemberRes.then(res3 => {
-            this.teamInfo.teamMemberList = res3.data.data.list1
-            this.teamInfo.joinTeam_memberList = res3.data.data.list2
-            this.teamInfo.teamCaptain = res3.data.data.list3[0].newCaptain
-            this.teamInfo.captainID = res3.data.data.list3[0].CaptainId
-            this.teamInfo.teamMemberList.splice(this.teamInfo.teamMemberList.findIndex(item => item.id === this.teamInfo.captainID), 1)
-
+          const teamInfoRes = axios('http://127.0.0.1:3030/team/teaminfo', { headers: { Authorization: token } })
+          // console.log(teamInfoRes)
+          teamInfoRes.then(val => {
+            console.log(val.data)
+            this.teamInfo.teamCaptain = val.data.teamInfo[0].newCaptain
+            this.teamInfo.captainID = val.data.teamInfo[0].CaptainID
+            // this.teamInfo.teamPic = 'https://' + val.data.teamInfo[0].teamPic
             if (this.teamInfo.captainID !== this.userinfo.userID) {
               this.DeleteDisabled = true
             }
-          }).catch(err3 => {
-            console.log('err3' + err3)
+          }).catch(err => {
+            console.log(err)
           })
         }
+
         // 获取活动信息
         const getActiRes = axios({
           url: 'http://127.0.0.1:3030/team/getTeamActivity',
           method: 'get'
-          // headers: { Authorization: token }
-          // data: {
-          //   userID: this.userinfo.userID,
-          //   username: this.userinfo.username,
-          //   teamID: this.teamInfo.teamID,
-          //   teamName: this.teamInfo.teamName
-          // }
         })
 
         getActiRes.then((res2) => {
-          // console.log(res2.data)
-          // console.log(res2.data.ActiData)
           this.activityList = res2.data.ActiData
-          console.log(this.activityList)
-          // const _this = this
-          // console.log(_this.userinfo)
+          console.log(res2.data)
+
           const arrRes = this.activityList.filter((item, index) => {
-            return item.teamname === this.teamInfo.teamName
+            return item.teamName === this.teamInfo.teamName
           })
-          // console.log(arrRes)
+
           if (arrRes.length === 0) {
             this.MyActivityName = ''
           } else {
@@ -273,7 +257,6 @@ export default {
             this.acti_id = arrRes[0].id
             this.buttonDisabled = true
           }
-          // console.log(this.MyActivityName)
         }).catch(err2 => {
           console.log('err2' + err2)
         })

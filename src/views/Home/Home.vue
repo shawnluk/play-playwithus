@@ -47,9 +47,9 @@
             <template slot-scope="scope">
               <el-popover trigger="hover" placement="top">
                 <p>创建者: {{ scope.row.username }}</p>
-                <p>球队名: {{ scope.row.teamname }}</p>
+                <p>球队名: {{ scope.row.teamName }}</p>
                 <div slot="reference" class="name-wrapper">
-                  <el-tag size="medium">{{ scope.row.teamname }}</el-tag>
+                  <el-tag size="medium">{{ scope.row.teamName }}</el-tag>
                 </div>
               </el-popover>
             </template>
@@ -101,6 +101,9 @@
 
 <script>
 import axios from 'axios'
+// import { getUserInfo } from '@/api/user.js'
+// import { getTeamInfo } from '@/api/team.js'
+// import { getActivity } from '@/api/activity.js'
 
 export default {
   name: 'Home',
@@ -116,7 +119,7 @@ export default {
         password: '',
         nickname: '',
         email: '',
-        userpic: '',
+        userPic: '',
         picUrl: ''
       },
       teamInfo: {
@@ -136,70 +139,74 @@ export default {
   created () {
     this.initImgList()
 
-    // todo =>获取用户信息
-    const token = localStorage.getItem('token')
-    if (!token) {
-      console.log('create:token不存在')
-    }
-    const UserRes = axios({
-      method: 'get',
-      url: 'http://127.0.0.1:3030/my/userinfo',
-      headers: { Authorization: token }
-    })
-    UserRes.then(res => {
-      console.log(res)
-      this.userinfo.userID = res.data.data.id
-      this.userinfo.username = res.data.data.username
-      this.userinfo.nickname = res.data.data.nickname
-      this.userinfo.email = res.data.data.email
-      this.userinfo.userpic = res.data.data.userpic
-      this.teamInfo.teamName = res.data.data.teamName
-      this.teamInfo.teamID = res.data.data.teamID
-      if (this.userinfo.userpic !== null) {
-        const picUrl = 'https://' + this.userinfo.userpic
-        // console.log(picUrl)
-        this.userinfo.picUrl = picUrl
-        this.avatarShow = false
+    /* 获取用户信息和球队信息 */
+    this.$API.user.getUserInfo().then(resUser => {
+      if (resUser.data.status === 200) {
+        console.log(resUser.data)
+        this.userinfo.userID = resUser.data.userData.id
+        this.userinfo.username = resUser.data.userData.username
+        this.userinfo.nickname = resUser.data.userData.nickname
+        this.userinfo.email = resUser.data.userData.email
+        this.userinfo.userPic = resUser.data.userData.userPic
+
+        // 拼接用户头像src
+        if (this.userinfo.userPic !== null) {
+          const picUrl = 'https://' + this.userinfo.userPic
+          this.userinfo.picUrl = picUrl
+        }
+        return
       }
-      if (this.teamInfo.teamID !== null) {
-        const teamMemberRes = axios({
-          url: 'http://127.0.0.1:3030/team/memberlist',
-          method: 'post',
-          headers: { Authorization: token },
-          data: {
-            teamID: this.teamInfo.teamID
+      console.log(resUser.data)
+    }).catch(errUser => {
+      console.log('获取用户信息失败' + errUser)
+    })
+
+    /* 获取用户所在球队信息 */
+    this.$API.team.getTeamInfo().then(resTeam => {
+      // 已经加入球队
+      if (resTeam.data.status === 200) {
+        console.log(resTeam.data)
+        this.teamInfo.teamName = resTeam.data.teamInfo[0].teamName
+        this.teamInfo.teamID = resTeam.data.teamInfo[0].teamID
+        this.teamInfo.teamCaptain = resTeam.data.teamInfo[0].newCaptain
+        this.teamInfo.captainID = resTeam.data.teamInfo[0].CaptainID
+        return
+      }
+      // 处于球队加入申请状态
+      if (resTeam.data.status === 201) {
+        this.$API.team.getTeamJoinStatus().then(resJoin => {
+          if (resJoin.data.status === 200) {
+            console.log(resJoin.data)
+            this.teamInfo.teamName = resJoin.data.joinData.teamName + '（等待队长同意加入申请）'
+            this.teamInfo.teamID = resJoin.data.joinData.teamID
+            return
           }
+          if (resJoin.data.status === 201) {
+            return console.log(resJoin.data)
+          }
+          console.log(resJoin.data)
+        }).catch(errJoin => {
+          console.log('获取球队申请状态失败' + errJoin)
         })
-
-        teamMemberRes.then(res3 => {
-          // this.teamInfo.teamMemberList = res3.data.data.list1
-          // this.teamInfo.joinTeam_memberList = res3.data.data.list2
-          this.teamInfo.teamCaptain = res3.data.data.list3[0].newCaptain
-          this.teamInfo.captainID = res3.data.data.list3[0].CaptainId
-          // this.teamInfo.teamMemberList.splice(this.teamInfo.teamMemberList.findIndex(item => item.id === this.teamInfo.captainID), 1)
-        })
+        return
       }
-    }).catch(err => {
-      console.log(err)
+      console.log(resTeam.data)
+    }).catch(errTeam => {
+      console.log('获取球队信息失败' + errTeam)
     })
 
-    // todo => 获取活动信息
-
-    const getActiRes = axios({
-      url: 'http://127.0.0.1:3030/team/getTeamActivity'
-    })
-    getActiRes.then((res2) => {
-      // console.log(res2.data)
-      // console.log(res2.data.ActiData)
-      this.activityList = res2.data.ActiData
+    /* 获取活动列表信息 */
+    this.$API.activity.getActivity().then(resActi => {
+      console.log(resActi.data)
+      this.activityList = resActi.data.ActiData
       const newObj = {
         '活动名称:': this.activityList[0].acti_name,
         '活动日期:': this.activityList[0].acti_date
       }
       this.notice_text = JSON.stringify(newObj)
-      console.log(this.activityList)
-    }).catch(err2 => {
-      console.log('err2' + err2)
+      // console.log(this.activityList)
+    }).catch(errActi => {
+      console.log('获取活动列表失败' + errActi)
     })
 
     // todo => 获取球队列表信息
@@ -253,7 +260,7 @@ export default {
       }
       // if ()
       const teamNameRes = this.activityList.filter(item => {
-        return item.teamname === this.teamInfo.teamName
+        return item.teamName === this.teamInfo.teamName
       })
       console.log(teamNameRes.length)
       if (teamNameRes.length !== 0) {
