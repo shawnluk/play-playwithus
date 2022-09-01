@@ -33,7 +33,7 @@
         </div>
         <!-- 登录和重置按钮 -->
         <div class="form-group form-inline d-flex justify-content-end">
-          <button type="button" class="btn btn-secondary mr-2" @click="Reguser">立即注册</button>
+          <button type="button" class="btn btn-secondary mr-2" @click="register">立即注册</button>
           <button type="button" class="btn btn-secondary mr-2" @click="reset">重置</button>
           <button type="button" class="btn btn-primary" @click="login">登录</button>
         </div>
@@ -43,10 +43,11 @@
 </template>
 
 <script>
-import axios from 'axios'
+// import axios from 'axios'
 // import router from '@/router/index'
 
 export default {
+  inject: ['reload'],
   name: 'MyLogin',
   data () {
     return {
@@ -60,42 +61,51 @@ export default {
       this.password = ''
     },
     login () {
-      const url = 'http://127.0.0.1:3030/user/login'
-      // console.log(this.username)
-      axios.post(url, {
+      const data = {
         username: this.username,
         password: this.password
-      }).then(res => {
-        // console.log(this.username)
-        console.log(res.data)
-        if (res.data.status === 1) {
-          alert(JSON.stringify(res.data))
-        }
-
-        if (res.data.status === 0) {
-          //   alert('登陆成功')
-          localStorage.setItem('token', res.data.token)
+      }
+      this.$API.user.login(data).then(resLogin => {
+        if (resLogin.data.status === 100) {
+          localStorage.setItem('token', resLogin.data.userData.token)
+          // alert('登陆成功')
           this.$router.replace('/user')
+          // this.$router.push('/my/userinfo')
         }
-      }).catch((err) => {
-        console.log(err)
-        // console.log('请求错误')
+        console.log(resLogin.data)
+      }).catch(errLogin => {
+        console.log('errLogin' + errLogin)
       })
     },
-    Reguser () {
-      const url = 'http://127.0.0.1:3030/user/reguser'
-      axios.post(url, {
+    register () {
+      const data = {
         username: this.username,
         password: this.password
-      }).then(res => {
+      }
+      this.$API.user.register(data).then(res => {
+        if (res.data.status === 100) {
+          console.log(res.data)
+          this.login()
+          return
+        }
         console.log(res.data)
-        // this.$router.push('/my/userinfo')
-        this.login()
       }).catch(err => {
         console.log(err)
       })
     }
   }
+  // watch: {
+  //   // const token = localStorage.getItem('token')
+  //   token: {
+  //     handler (a, b) {
+  //       // console.log(a)
+  //       // console.log(b)
+  //       if (a) {
+  //         this.$router.push('/user')
+  //       }
+  //     }
+  //   }
+  // }
 }
 </script>
 

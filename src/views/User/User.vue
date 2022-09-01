@@ -98,6 +98,7 @@ export default {
         this.userinfo.email = resUser.data.userData.email
         this.userinfo.userPic = resUser.data.userData.userPic
 
+        this.loginShow = false
         // 拼接用户头像src
         if (this.userinfo.userPic !== null) {
           const picUrl = 'https://' + this.userinfo.userPic
@@ -117,7 +118,7 @@ export default {
       if (resTeam.data.status === 200) {
         console.log(resTeam.data)
         this.teamInfo.teamName = resTeam.data.teamInfo[0].teamName
-        this.teamInfo.teamID = resTeam.data.teamInfo[0].teamID
+        this.teamInfo.teamID = resTeam.data.teamInfo[0].id
         this.teamInfo.teamCaptain = resTeam.data.teamInfo[0].newCaptain
         this.teamInfo.captainID = resTeam.data.teamInfo[0].CaptainID
         return
@@ -131,9 +132,9 @@ export default {
             this.teamInfo.teamID = resJoin.data.joinData.teamID
             return
           }
-          if (resJoin.data.status === 201) {
-            return console.log(resJoin.data)
-          }
+          // if (resJoin.data.status === 201) {
+          //   return console.log(resJoin.data)
+          // }
           console.log(resJoin.data)
         }).catch(errJoin => {
           console.log('获取球队申请状态失败' + errJoin)

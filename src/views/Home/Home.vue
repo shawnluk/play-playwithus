@@ -167,7 +167,7 @@ export default {
       if (resTeam.data.status === 200) {
         console.log(resTeam.data)
         this.teamInfo.teamName = resTeam.data.teamInfo[0].teamName
-        this.teamInfo.teamID = resTeam.data.teamInfo[0].teamID
+        this.teamInfo.teamID = resTeam.data.teamInfo[0].id
         this.teamInfo.teamCaptain = resTeam.data.teamInfo[0].newCaptain
         this.teamInfo.captainID = resTeam.data.teamInfo[0].CaptainID
         return
@@ -181,9 +181,9 @@ export default {
             this.teamInfo.teamID = resJoin.data.joinData.teamID
             return
           }
-          if (resJoin.data.status === 201) {
-            return console.log(resJoin.data)
-          }
+          // if (resJoin.data.status === 201) {
+          //   return console.log(resJoin.data)
+          // }
           console.log(resJoin.data)
         }).catch(errJoin => {
           console.log('获取球队申请状态失败' + errJoin)

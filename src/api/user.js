@@ -1,4 +1,21 @@
+
 import request from '@/utils//request.js'
+
+export function register (userData) {
+  return request({
+    url: '/user/register',
+    method: 'post',
+    data: userData
+  })
+}
+
+export function login (userData) {
+  return request({
+    url: '/user/login',
+    method: 'post',
+    data: userData
+  })
+}
 
 export function getUserInfo () {
   return request({

@@ -8,7 +8,7 @@
     </div>
     <el-button  type="button" class="btn btn-primary" @click="createTeam">创建我的球队</el-button>
     <el-button  type="button" class="btn btn-primary" @click="joinTeam">加入球队</el-button>
-    <el-button  type="button" class="btn btn-primary" @click="createTeamAction">查看活动</el-button>
+    <el-button  type="button" class="btn btn-primary" @click="toActivity">查看活动</el-button>
     <el-button  type="button" class="btn btn-primary" @click="DeleteTeamJoin">撤销申请</el-button>
     <el-button  type="button" class="btn btn-primary" @click="setTeamInfo">修改球队资料</el-button>
     <!-- <el-button> -->
@@ -42,15 +42,17 @@
       name="1"
       :disabled="teamInfo.checkTeamMemberDisable"
       >
-        <div> 队长：{{this.teamInfo.teamCaptain}}</div>
+        <div> 队长：</div>
+        <div> =======>>{{this.teamInfo.teamCaptain}}</div>
+        <div> 队员：{{this.teamInfo.noMember}}</div>
         <div v-for=" item in teamInfo.teamMemberList" :key='item.id'
         >
-        {{item.username}}
+        =======>>{{item.username}}
         </div>
-        <div v-for="item in teamInfo.joinTeam_memberList" :key = 'item.id'
+        <div>等待申请通过：{{this.teamInfo.noJoin}}</div>
+        <div v-for=" item in teamInfo.joinTeam_memberList" :key='item.id'
         >
-        等待申请通过：
-        {{item.username}}
+        =======>>{{item.username}}
         </div>
       </van-collapse-item>
     </van-collapse>
@@ -59,7 +61,7 @@
 
 <script>
 
-import axios from 'axios'
+// import axios from 'axios'
 // import { getUserInfo } from '@/api/user.js'
 // import { getTeamInfo, getTeamJoinStatus } from '@/api/team.js'
 
@@ -78,13 +80,15 @@ export default {
         picUrl: ''
       },
       teamInfo: {
+        noMember: 'null',
+        noJoin: 'null',
         teamName: '',
         teamID: '',
-        joinStatus: false,
+        joinStatus: 0,
         activeName: '0',
-        checkTeamMemberDisable: false,
-        teamMemberList: [],
-        joinTeam_memberList: [],
+        checkTeamMemberDisable: true,
+        teamMemberList: [{ username: '无' }],
+        joinTeam_memberList: [{ username: '无' }],
         teamCaptain: '',
         captainID: '',
         teamPic: ''
@@ -95,189 +99,193 @@ export default {
     }
   },
   created () {
-    const token = localStorage.getItem('token')
-    const url = 'http://127.0.0.1:3030/my/userinfo'
-    const res = axios({
-      url,
-      headers: { Authorization: token }
+    /* 获取用户信息 */
+    this.$API.user.getUserInfo().then(resUser => {
+      if (resUser.data.status === 200) {
+        console.log(resUser.data)
+        this.userinfo.userID = resUser.data.userData.id
+        this.userinfo.username = resUser.data.userData.username
+        this.userinfo.nickname = resUser.data.userData.nickname
+        this.userinfo.email = resUser.data.userData.email
+        this.userinfo.userPic = resUser.data.userData.userPic
+
+        // 拼接用户头像src
+        if (this.userinfo.userPic !== null) {
+          const picUrl = 'https://' + this.userinfo.userPic
+          this.userinfo.picUrl = picUrl
+          this.avatarShow = false
+        }
+        return
+      }
+      console.log(resUser.data)
+    }).catch(errUser => {
+      console.log('获取用户信息失败' + errUser)
     })
-    // console.log(res)
-    res.then(res1 => {
-      console.log(res1.data)
-      this.userinfo.userID = res1.data.data.id
-      this.userinfo.username = res1.data.data.username
-      this.userinfo.nickname = res1.data.data.nickname
-      this.userinfo.email = res1.data.data.email
-      this.userinfo.userPic = res1.data.data.userPic
-      this.teamInfo.teamName = res1.data.data.teamName
-      this.teamInfo.teamID = res1.data.data.teamID
-      // this.teamInfo.teamPic = res1.data.data.teamPic
 
-      if (this.teamInfo.teamID !== null) {
-        /* 获取球队信息 */
+    /* 获取用户所在球队信息 */
+    this.$API.team.getTeamInfo().then(resTeam => {
+      // 已经加入球队
+      if (resTeam.data.status === 200) {
+        console.log(resTeam.data)
+        this.teamInfo.checkTeamMemberDisable = false
+        this.teamInfo.teamName = resTeam.data.teamInfo[0].teamName
+        this.teamInfo.teamID = resTeam.data.teamInfo[0].id
+        this.teamInfo.teamCaptain = resTeam.data.teamInfo[0].newCaptain
+        this.teamInfo.captainID = resTeam.data.teamInfo[0].CaptainID
+        this.teamInfo.teamPic = 'https://' + resTeam.data.teamInfo[0].teamPic
 
-        const teamInfoRes = axios('http://127.0.0.1:3030/team/teaminfo', { headers: { Authorization: token } })
-        // console.log(teamInfoRes)
-        teamInfoRes.then(val => {
-          console.log(val.data)
-          this.teamInfo.teamCaptain = val.data.teamInfo[0].newCaptain
-          this.teamInfo.captainID = val.data.teamInfo[0].CaptainID
-          this.teamInfo.teamPic = 'https://' + val.data.teamInfo[0].teamPic
-          // if (this.userinfo.userID === this.teamInfo.captainID) {
-          //   this.el_popoverDisable = false
+        /*  获取球员列表 */
+        const data = { teamID: this.teamInfo.teamID }
+
+        this.$API.team.getTeamMember(data).then(resMember => {
+          if (resMember.data.status === 200) {
+            console.log(resMember.data)
+            this.teamInfo.teamMemberList = resMember.data.memberData.list1
+            this.teamInfo.teamMemberList.splice(this.teamInfo.teamMemberList.findIndex(item => item.id === this.teamInfo.captainID), 1)
+            this.teamInfo.joinTeam_memberList = resMember.data.memberData.list2
+
+            if (this.teamInfo.teamMemberList.length !== 0) {
+              this.el_popoverDisable = false
+            }
+            if (this.teamInfo.teamMemberList.length !== 0) {
+              this.teamInfo.noMember = ''
+            }
+            if (this.teamInfo.joinTeam_memberList.length !== 0) {
+              this.teamInfo.noJoin = ''
+            }
+            return
+          }
+          // if (resMember.data.status === 400) {
+          //   // return alert('提交了错误的teamID')
+          //   return console.log(resMember.data)
           // }
-        }).catch(err => {
-          console.log(err)
+          console.log(resMember.data)
+        }).catch(errMember => {
+          console.log('errMember' + errMember)
         })
 
-        /* 获取球员信息 */
-
-        const teamMemberRes = axios({
-          url: 'http://127.0.0.1:3030/team/memberlist',
-          method: 'post',
-          headers: { Authorization: token },
-          data: {
-            teamID: this.teamInfo.teamID
-          }
-        })
-
-        teamMemberRes.then(res3 => {
-          console.log(res3.data)
-          this.teamInfo.teamMemberList = res3.data.data.list1
-          this.teamInfo.joinTeam_memberList = res3.data.data.list2
-          this.teamInfo.teamMemberList.splice(this.teamInfo.teamMemberList.findIndex(item => item.id === this.teamInfo.captainID), 1)
-
-          if (this.teamInfo.teamMemberList.length !== 0) {
-            this.el_popoverDisable = false
-          }
-        })
+        return
       }
-
-      if (res1.data.data.teamID === null) {
-        this.teamInfo.checkTeamMemberDisable = true
-      }
-
-      if (this.teamInfo.teamName === null) {
-        // console.log(token)
-        // console.log('还没申请球队，准备查看申请状态')
-        const url = 'http://127.0.0.1:3030/team/joinstatus'
-        const res2 = axios.post(url, { userID: this.userinfo.userID, username: this.userinfo.username })
-        res2.then(res2 => {
-          // console.log(res2.data.message)
-          if (res2.data.message.joinStatus === 1) {
-            this.teamInfo.teamName = res2.data.message.teamName + '(等待申请通过)'
-            // console.log('正在申请球队')
-            this.teamInfo.joinStatus = true
-            this.teamInfo.teamID = res2.data.message.teamID
-            // console.log(this.joinStatus)
+      // 处于球队加入申请状态
+      if (resTeam.data.status === 201) {
+        this.$API.team.getTeamJoinStatus().then(resJoin => {
+          if (resJoin.data.status === 200) {
+            console.log(resJoin.data)
+            this.teamInfo.teamName = resJoin.data.joinData.teamName + '（等待队长同意加入申请）'
+            this.teamInfo.teamID = resJoin.data.joinData.teamID
+            this.teamInfo.joinStatus = resJoin.data.joinData.joinStatus
+            return
           }
-          if (res2.data.message.joinStatus === 0) {
-            this.teamInfo.teamName = null
-            this.teamInfo.joinStatus = false
-          }
+          // if (resJoin.data.status === 201) {
+          //   return console.log(resJoin.data)
+          // }
+
+          return console.log(resJoin.data)
+        }).catch(errJoin => {
+          console.log('获取球队申请状态失败' + errJoin)
         })
+        return
       }
+      console.log(resTeam.data)
+    }).catch(errTeam => {
+      console.log('获取球队信息失败' + errTeam)
     })
   },
+
   // beforeDestroy () {
   //   bus.$emit('share', this.username)
   // },
   methods: {
-    async selectCaptain (selectCaptain) {
-      console.log(selectCaptain)
+    selectCaptain (selectCaptain) {
+      // console.log(selectCaptain)
       const newCaptainObj = this.teamInfo.teamMemberList.filter(item => item.username === selectCaptain)
-      const { data: res } = await axios.post('http://127.0.0.1:3030/team/quit', {
-        userID: this.userinfo.userID,
+      const data = {
         teamID: this.teamInfo.teamID,
         newCaptain: newCaptainObj[0]
-      })
-      if (res.status === 200) {
-        this.teamInfo.teamName = ''
-        alert(JSON.stringify(res))
-        this.reload()
       }
+      this.$API.team.teamQuit(data).then(resQuit => {
+        console.log(resQuit.data)
+        this.reload()
+      }).catch(errQuit => {
+        console.log('errQuit' + errQuit)
+      })
     },
-    createTeamAction () {
-      // if (this.userinfo.userID !== this.teamInfo.captainID) {
-      //   return alert('你不是球队队长，不能创建活动')
-      // }
-      this.$router.push('/team/Activity')
-    },
-    async QuitTeam () {
+    QuitTeam () {
       // this.el_popoverDisable = true
-      if (this.teamInfo.joinStatus) {
+      if (this.teamInfo.joinStatus === 1) {
         return alert('球队申请中，请选择撤销申请')
       }
       if (this.teamInfo.teamName === null) {
         return alert('你还未加入任何球队')
       }
+
       if (confirm('你是否要退出球队：' + this.teamInfo.teamName)) {
+        // .......................
+        // 队员退出球队
         if (this.userinfo.userID !== this.teamInfo.captainID) {
-          const { data: res } = await axios.post('http://127.0.0.1:3030/team/quit', {
-            userID: this.userinfo.userID,
-            teamID: this.teamInfo.teamID
-          })
-          if (res.status === 200) {
-            this.teamInfo.teamName = ''
-            alert(JSON.stringify(res))
-            this.reload()
+          this.el_popoverDisable = true
+          const data = {
+            teamID: this.teamInfo.teamID,
+            newCaptain: ''
           }
+          this.$API.team.teamQuit(data).then(resQuit => {
+            console.log(resQuit.data)
+            this.reload()
+          }).catch(errQuit => {
+            console.log('errQuit' + errQuit)
+          })
+          return
         }
+        // .......................
+        // 只有队长一人,退出球队
         if (this.userinfo.userID === this.teamInfo.captainID && this.teamInfo.teamMemberList.length === 0) {
           if (confirm('此操作是要删除球队：' + this.teamInfo.teamName)) {
-            const token = localStorage.getItem('token')
-            const { data: res } = await axios.post('http://127.0.0.1:3030/team/delete', {}, {
-              // userID: this.userinfo.userID,
-              // teamID: this.teamInfo.teamID
-              headers: { Authorization: token }
-            })
-            if (res.status === 200) {
-              alert(JSON.stringify(res))
-              this.reload()
+            const data = {
+              teamID: this.teamInfo.teamID
             }
+            this.$API.team.teamDelete(data).then(resDelete => {
+              console.log(resDelete.data)
+            }).catch(errDelete => {
+              console.log('errDelete' + errDelete)
+            })
           }
+          return false
         }
+        this.el_popoverDisable = false
       } else {
         this.reload()
       }
     },
-    async DeleteTeamJoin () {
-      // console.log(this.teamID)
-      const resConfirm = confirm('确认要撤销你的球队加入申请吗？')
-      // console.log(this.joinStatus)
+    DeleteTeamJoin () {
       if (!this.teamInfo.joinStatus) {
         alert('你没有申请球队,请勿乱按')
         return
       }
-      // console.log(res)
-      if (resConfirm) {
-        // console.log('准备发起撤销申请')
-        const { data: res } = await axios.post('http://127.0.0.1:3030/team/deleteJoinStatus', { userID: this.userinfo.userID })
-        // console.log(res)
-        if (res.status === 0 && res.message === '已收到撤销申请') {
-          this.teamInfo.teamName = null
-          this.teamInfo.joinStatus = false
-        }
-        // console.log(this.joinStatus)
-      }
+
+      this.$API.team.DeleteJoinStatus().then(res => {
+        console.log(res.data)
+        this.reload()
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    toActivity () {
+      this.$router.push('/team/Activity')
     },
     joinTeam () {
-      // console.log(this.teamName)
-      if (this.teamInfo.teamName !== null) {
+      if (this.teamInfo.teamName !== '') {
         return alert('已加入球队，不能再申请加入其他球队')
       }
       this.$router.push('/team/join')
     },
     createTeam () {
-      // console.log('正在准备创建球队')
-      if (this.teamInfo.teamName !== null) {
-        return alert('球队名不为空')
+      if (this.teamInfo.teamName !== '') {
+        return alert('球队名不为空,已加入球队')
       }
-
       this.$router.push('/team/create')
     },
     setTeamInfo () {
-      if (this.teamInfo.teamName === null) {
+      if (this.teamInfo.teamName === '') {
         return alert('你还未加入任何球队')
       }
       if (this.userinfo.userID !== this.teamInfo.captainID) {

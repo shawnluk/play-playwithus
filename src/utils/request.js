@@ -18,12 +18,11 @@ import { Toast } from 'vant'
 
 // }
 
-const token = localStorage.getItem('token')
-
+// const token = localStorage.getItem('token')
 const Axios = axios.create({
   baseURL: 'http://127.0.0.1:3030',
-  timeout: 5000,
-  headers: { Authorization: token }
+  timeout: 5000
+  // headers: { Authorization: token }
 })
 
 // 添加请求拦截器
@@ -37,10 +36,12 @@ Axios.interceptors.request.use(function (config) {
   //   console.log(config)
   //   return config
   // }
-
-  if (!token) {
-    console.log('create:token不存在')
-  }
+  // if (token) {
+  // console.log(config)
+  // console.log('token不存在')
+  // const token = localStorage.getItem('token')
+  config.headers.Authorization = localStorage.getItem('token')
+  // }
   return config
 }, function (error) {
   return Promise.reject(error)
@@ -49,6 +50,10 @@ Axios.interceptors.request.use(function (config) {
 // 添加响应拦截器
 Axios.interceptors.response.use(res => {
   // console.log(res)
+  // if (res.data.status === 100) {
+  //   localStorage.setItem('token', res.data.userData.token)
+  // }
+
   if (res.data.status === 401) {
     Toast('登陆信息过期，请先登陆喔')
     // console.log(this)
