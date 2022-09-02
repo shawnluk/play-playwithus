@@ -11,8 +11,8 @@ import UserInfo from '@/components/user/UserInfo.vue'
 import teamJoin from '@/components/team/TeamJoin.vue'
 import UserData from '@/components/user/SetUserData.vue'
 import setPassword from '@/components/user/SetPassword.vue'
-import createTeamActivity from '@/components/team/CreateTeamActivity.vue'
-import teamActivity from '@/components/team/TeamActivity.vue'
+import createActivity from '@/components/team/CreateActivity.vue'
+import teamActivity from '@/components/team/ActivityData.vue'
 import SetTeamInfo from '@/components/team/SetTeamInfo.vue'
 import TeamInfo from '@/components/team/TeamInfo.vue'
 
@@ -30,7 +30,7 @@ const routes = [
   { path: '/my/update', component: UserData, meta: { TabBarShow: false } },
   { path: '/my/setPassword', component: setPassword, meta: { TabBarShow: false } },
   { path: '/team/join', component: teamJoin, meta: { TabBarShow: false } },
-  { path: '/team/createTeamActivity', component: createTeamActivity, meta: { TabBarShow: false } },
+  { path: '/team/createActivity', component: createActivity, meta: { TabBarShow: false } },
   { path: '/team/activity', component: teamActivity, meta: { TabBarShow: false } },
   { path: '/team/TeamInfo', component: TeamInfo, meta: { TabBarShow: false } },
   { path: '/team/SetTeamInfo', component: SetTeamInfo, meta: { TabBarShow: false } }

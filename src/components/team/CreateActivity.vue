@@ -136,8 +136,8 @@ export default {
     })
     resAxios.then(val => {
       console.log(val.data)
-      this.teamName = val.data.teamName
-      this.teamID = val.data.teamID
+      this.teamName = val.data.teamInfo[0].teamName
+      this.teamID = val.data.teamInfo[0].id
     }).catch(err => {
       console.log(err)
     })
