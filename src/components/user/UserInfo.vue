@@ -43,7 +43,7 @@ export default {
       teamInfo: {
         teamName: '',
         teamID: '',
-        joinStatus: '',
+        joinStatus: 0,
         activeName: '0'
       }
     }
@@ -79,8 +79,6 @@ export default {
         console.log(resTeam.data)
         this.teamInfo.teamName = resTeam.data.teamInfo[0].teamName
         this.teamInfo.teamID = resTeam.data.teamInfo[0].teamID
-        this.teamInfo.teamCaptain = resTeam.data.teamInfo[0].newCaptain
-        this.teamInfo.captainID = resTeam.data.teamInfo[0].CaptainID
         return
       }
       // 处于球队加入申请状态
@@ -90,6 +88,7 @@ export default {
             console.log(resJoin.data)
             this.teamInfo.teamName = resJoin.data.joinData.teamName + '（等待队长同意加入申请）'
             this.teamInfo.teamID = resJoin.data.joinData.teamID
+            this.teamInfo.joinStatus = 1
             return
           }
           if (resJoin.data.status === 201) {
@@ -112,14 +111,14 @@ export default {
       this.$router.push('/my/setPassword')
     },
     updateData () {
-      console.log('准备更新个人资料')
+      // console.log('准备更新个人资料')
       this.$router.push('/my/update')
     },
     toTeam () {
-      this.$router.push('/team/teaminfo')
+      this.$router.push('/team/teamCenter')
     },
     toActivity () {
-      this.$router.push('/team/activity')
+      this.$router.push('/activity/list')
     },
     logOut () {
       // console.log('准备退出登陆')

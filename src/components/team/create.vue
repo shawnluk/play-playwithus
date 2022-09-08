@@ -42,64 +42,60 @@
 </template>
 
 <script>
-import axios from 'axios'
+// import axios from 'axios'
 import { Toast } from 'vant'
+
 export default {
   name: 'createTeam',
+  inject: ['reload'],
+
   data () {
     return {
+      teamID: '',
       teamName: '',
       teamSlogan: '',
-      fileList: [],
-      teamDesc: ''
+      teamDesc: '',
+      fileList: []
     }
   },
   methods: {
-    async onSubmit (values) {
-      // this.$router.replace('/user')
+    onSubmit (values) {
       console.log('submit', values)
 
       if (confirm('请确认你要创建的球队名为：' + values.teamName)) {
-        // else if (values.teamName) {
-        const token = localStorage.getItem('token')
-        const { data: res } = await axios({
-          method: 'post',
-          headers: { Authorization: token },
-          url: 'http://127.0.0.1:3030/team/create',
-          data: {
-            teamName: values.teamName,
-            teamSlogan: values.teamSlogan,
-            teamDesc: values.teamDesc
-          }
-        })
-        console.log(res)
-        // }
-        if (res.status === 0) {
-          if (values.teamPic.length !== 0) {
-            const formData = new FormData()
-            formData.append('avatar', values.teamPic[0].file)
-            const url = 'http://127.0.0.1:3030/team/setPic'
-            axios.post(url, formData,
-              {
-                headers: { Authorization: token, enctype: 'multipart/form-data' }
-              }).then(res1 => {
-              alert(JSON.stringify(res1.data))
-            })
-              .catch(err1 => {
-                console.log(err1)
-              })
-          }
-          alert(JSON.stringify(res))
-          this.$router.replace('/user')
-        } else {
-          alert('发生错误，请重试')
+        const teamData = {
+          teamName: values.teamName,
+          teamSlogan: values.teamSlogan,
+          teamDesc: values.teamDesc,
+          createTime: new Date().toJSON()
         }
+
+        this.$API.team.createTeam(teamData).then(res => {
+          console.log(res.data)
+          if (res.data.status === 200) {
+            this.teamID = res.data.teamID
+
+            if (values.teamPic.length !== 0) {
+              const formData = new FormData()
+              formData.append('avatar', values.teamPic[0].file, this.teamID)
+
+              this.$API.team.setPic(formData).then(result => {
+                console.log(result.data)
+              }).catch(error => {
+                console.log(error)
+              })
+            }
+            this.$router.replace('/team/teamCenter')
+          }
+        }).catch(err => {
+          console.log(err)
+        })
       }
     },
     beforeRead (file) {
       // console.log(file)
-      if (file.type !== 'image/jpeg') {
-        Toast('请上传 jpg 格式图片')
+      if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
+        Toast('请上传 jpg 或 png 格式图片')
         return false
       }
       return true

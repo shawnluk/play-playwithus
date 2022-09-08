@@ -22,7 +22,6 @@
       sortable
       fixed
     > -->
-
     <!-- </el-table-column>
     <el-table-column
       prop="teamName"
@@ -50,6 +49,7 @@
       label="比赛描述">
     </el-table-column>
   </el-table> -->
+
     <el-table
     :key="key"
     :data="activityList"
@@ -90,6 +90,7 @@
 const tableContent = [
   // { label: '序号', prop: 'id' },
   { label: '日期', prop: 'acti_date' },
+  { label: '活动名称', prop: 'acti_name' },
   { label: '球队名称', prop: 'teamName' },
   { label: '联系队长', prop: 'newCaptain' },
   { label: '地址', prop: 'acti_region' },
@@ -168,7 +169,7 @@ export default {
       if (this.userinfo.userID !== this.teamInfo.captainID) {
         return alert('你不是球队队长，不能创建活动')
       }
-      this.$router.push('/team/createActivity')
+      this.$router.push('/activity/create')
     },
     deleteActivity () {
       // console.log('撤销活动申请')
@@ -179,7 +180,8 @@ export default {
       if (confirm('你是否真的要撤销活动：' + this.myActi_name)) {
         const data = {
           acti_name: this.myActi_name,
-          acti_id: this.myActi_id
+          acti_id: this.myActi_id,
+          updateTime: new Date().toJSON()
         }
         this.$API.activity.deleteActivity(data).then(res => {
           if (res.data.status === 200) {
@@ -259,6 +261,7 @@ export default {
         const arrRes = this.activityList.filter((item, index) => {
           return item.teamName === this.teamInfo.teamName
         })
+        // console.log(arrRes)
         if (arrRes.length === 0) {
           this.myActi_name = ''
         } else {
@@ -273,73 +276,6 @@ export default {
     }).catch(errActi => {
       console.log('获取活动列表失败' + errActi)
     })
-    // // 获取个人信息及球队信息
-    // const token = localStorage.getItem('token')
-    // if (!token) {
-    //   alert('无登陆信息，请点击立即登陆')
-    //   this.$router.replace('/user/login')
-    // } else {
-    //   const url = 'http://127.0.0.1:3030/my/userinfo'
-    //   const res = axios({
-    //     url,
-    //     headers: { Authorization: token }
-    //   })
-    //   res.then(res1 => {
-    //     this.userinfo.userID = res1.data.data.id
-    //     this.userinfo.username = res1.data.data.username
-    //     this.userinfo.nickname = res1.data.data.nickname
-    //     this.userinfo.email = res1.data.data.email
-    //     this.userinfo.userPic = res1.data.data.userPic
-    //     this.teamInfo.teamName = res1.data.data.teamName
-    //     this.teamInfo.teamID = res1.data.data.teamID
-
-    //     if (this.teamInfo.teamID !== null) {
-    //       const teamInfoRes = axios('http://127.0.0.1:3030/team/teaminfo', { headers: { Authorization: token } })
-    //       // console.log(teamInfoRes)
-    //       teamInfoRes.then(val => {
-    //         console.log(val.data)
-    //         this.teamInfo.teamCaptain = val.data.teamInfo[0].newCaptain
-    //         this.teamInfo.captainID = val.data.teamInfo[0].CaptainID
-    //         // this.teamInfo.teamPic = 'https://' + val.data.teamInfo[0].teamPic
-    //         if (this.teamInfo.captainID !== this.userinfo.userID) {
-    //           this.DeleteDisabled = true
-    //         }
-    //       }).catch(err => {
-    //         console.log(err)
-    //       })
-    //     }
-
-    //     // 获取活动信息
-    //     const getActiRes = axios({
-    //       url: 'http://127.0.0.1:3030/team/getTeamActivity',
-    //       method: 'get'
-    //     })
-
-    //     getActiRes.then((res2) => {
-    //       this.activityList = res2.data.ActiData
-    //       console.log(res2.data)
-
-    //       const arrRes = this.activityList.filter((item, index) => {
-    //         return item.teamName === this.teamInfo.teamName
-    //       })
-
-    //       if (arrRes.length === 0) {
-    //         this.MyActivityName = ''
-    //       } else {
-    //         this.MyActivityName = arrRes[0].acti_name
-    //         this.acti_id = arrRes[0].id
-    //         this.buttonDisabled = true
-    //       }
-    //     }).catch(err2 => {
-    //       console.log('err2' + err2)
-    //     })
-    //   }).catch(err => {
-    //     console.log(err)
-    //     alert('载入页面出错，请重新登陆' + err)
-    //     this.$router.replace('/user/login')
-    //   })
-    // }
-    // getMaxLength()
   },
   watch: {
     /**

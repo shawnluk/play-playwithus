@@ -8,6 +8,7 @@ import router from './router'
 import BaiduMap from 'vue-baidu-map'
 import Plugin from 'v-fit-columns'
 import API from './api/index'
+import store from './store'
 
 Vue.use(Plugin)
 Vue.use(ElementUI)
@@ -20,6 +21,7 @@ Vue.config.productionTip = false
 Vue.prototype.$API = API
 
 new Vue({
+  store,
   router,
   render: h => h(App)
 }).$mount('#app')

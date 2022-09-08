@@ -19,10 +19,12 @@
 </template>
 
 <script>
-import axios from 'axios'
+// import axios from 'axios'
 import { Toast } from 'vant'
 
 export default {
+  name: 'setUserInfo',
+  inject: ['reload'],
   data () {
     return {
       nickValue: '',
@@ -41,12 +43,11 @@ export default {
       if (confirmRes) {
         const data = {
           nickname: this.nickValue,
-          email: this.emailValue
+          email: this.emailValue,
+          time: new Date().toJSON()
         }
+        // console.log(typeof data.updateTime)
         this.$API.user.setUserInfo(data).then(resSetUser => {
-          if (resSetUser.data.status !== 200) {
-            return console.log(resSetUser.data)
-          }
           console.log(resSetUser.data)
           alert(JSON.stringify(resSetUser.data))
         }).catch(errSetUser => {
@@ -74,24 +75,13 @@ export default {
             this.fileList = []
             return
           }
-
           const formData = new FormData()
           formData.append('avatar', file.file)
-          // this.$API.user.setUserPic(formData).then(resUserPic => {
-          //   console.log(resUserPic.data)
-          // }).catch(errUserPic => {
-          //   console.log(errUserPic)
-          // })
-
-          const token = localStorage.getItem('token')
-          const url = 'http://127.0.0.1:3030/my/setPic'
-
-          axios.post(url, formData, {
-            headers: { Authorization: token, enctype: 'multipart/form-data' }
-          }).then(res => {
-            // console.log(res.data) {
-            alert(JSON.stringify(res.data))
-            // this.$router.replace('/my/userinfo')
+          this.$API.user.setPic(formData).then(resUserPic => {
+            console.log(resUserPic.data)
+            this.reload()
+          }).catch(errUserPic => {
+            console.log(errUserPic)
           })
         }, 4000)
       }
@@ -123,27 +113,4 @@ export default {
     }
   }
 
-//   .avatar-uploader .el-upload {
-//   border: 1px dashed #d9d9d9;
-//   border-radius: 6px;
-//   cursor: pointer;
-//   position: relative;
-//   overflow: hidden;
-// }
-// .avatar-uploader .el-upload:hover {
-//   border-color: #409EFF;
-// }
-// .avatar-uploader-icon {
-//   font-size: 28px;
-//   color: #8c939d;
-//   width: 178px;
-//   height: 178px;
-//   line-height: 178px;
-//   text-align: center;
-// }
-// .avatar {
-//   width: 178px;
-//   height: 178px;
-//   display: block;
-// }
 </style>

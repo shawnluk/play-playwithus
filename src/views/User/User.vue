@@ -4,11 +4,11 @@
     <div class="user_img_wrap">
       <div class="user_img">
         <el-avatar icon="el-icon-user-solid" v-if='avatarShow'></el-avatar>
-        <el-avatar :src='userinfo.picUrl' v-else></el-avatar>
+        <el-avatar :src='this.$store.state.user.userPic' v-else></el-avatar>
       </div>
       <el-row>
         <el-button round @click="ToLogin" v-if='loginShow'>立即登陆</el-button>
-        <div  v-else>{{this.userinfo.username}}</div>
+        <div  v-else>{{this.username}}</div>
       </el-row>
     </div>
     <div class="my_data">我的数据</div>
@@ -22,10 +22,10 @@
       <van-cell title="我的消息" value="" is-link />
     </van-cell-group>
     <van-cell-group inset>
-      <van-cell title="当前赛事" value="查看活动" is-link to='team/activity' />
+      <van-cell title="当前赛事" value="查看活动" is-link to='/activity/list' />
     </van-cell-group>
     <van-cell-group inset>
-      <van-cell title="我的球队" value="球队设置" is-link to='team/TeamInfo'>
+      <van-cell title="我的球队" value="球队设置" is-link to='team/teamCenter'>
         <!-- 使用 title 插槽来自定义标题 -->
         <template #label>
           {{teamInfo.teamName}}
@@ -48,10 +48,9 @@
 </template>
 
 <script>
-// import axios from 'axios'
-// import { getUserInfo } from '@/api/user.js'
-// import { getTeamInfo, getTeamJoinStatus } from '@/api/team.js'
-// import { getActivity } from '@/api/activity.js'
+import { mapState, mapActions } from 'vuex'
+// import { mapActions } from 'vuex'
+// import { mapMutations } from 'vuex'
 
 export default {
   name: 'User',
@@ -62,15 +61,15 @@ export default {
       // nameShow: '',
       loginShow: true,
       avatarShow: true,
-      userinfo: {
-        userID: '',
-        username: '',
-        password: '',
-        nickname: '',
-        email: '',
-        userPic: '',
-        picUrl: ''
-      },
+      // userinfo: {
+      //   userID: '',
+      //   username: '',
+      //   password: '',
+      //   nickname: '',
+      //   email: '',
+      //   userPic: '',
+      //   picUrl: ''
+      // },
       teamInfo: {
         teamName: '',
         teamID: '',
@@ -88,29 +87,38 @@ export default {
     }
   },
   created () {
+    this.getUserInfo()
+    // this.logIn()
+    const isLogin = sessionStorage.getItem('isLogin')
+    console.log(isLogin)
+    // console.log(this.username)
+    if (isLogin === 1) {
+      this.loginShow = false
+      this.avatarShow = false
+    }
     /* 获取用户信息 */
-    this.$API.user.getUserInfo().then(resUser => {
-      if (resUser.data.status === 200) {
-        console.log(resUser.data)
-        this.userinfo.userID = resUser.data.userData.id
-        this.userinfo.username = resUser.data.userData.username
-        this.userinfo.nickname = resUser.data.userData.nickname
-        this.userinfo.email = resUser.data.userData.email
-        this.userinfo.userPic = resUser.data.userData.userPic
+    // this.$API.user.getUserInfo().then(resUser => {
+    //   if (resUser.data.status === 200) {
+    //     console.log(resUser.data)
+    //     this.userinfo.userID = resUser.data.userData.id
+    //     this.userinfo.username = resUser.data.userData.username
+    //     this.userinfo.nickname = resUser.data.userData.nickname
+    //     this.userinfo.email = resUser.data.userData.email
+    //     this.userinfo.userPic = resUser.data.userData.userPic
 
-        this.loginShow = false
-        // 拼接用户头像src
-        if (this.userinfo.userPic !== null) {
-          const picUrl = 'https://' + this.userinfo.userPic
-          this.userinfo.picUrl = picUrl
-          this.avatarShow = false
-        }
-        return
-      }
-      console.log(resUser.data)
-    }).catch(errUser => {
-      console.log('获取用户信息失败' + errUser)
-    })
+    //     this.loginShow = false
+    //     // 拼接用户头像src
+    //     if (this.userinfo.userPic !== null) {
+    //       const picUrl = 'https://' + this.userinfo.userPic
+    //       this.userinfo.picUrl = picUrl
+    //       this.avatarShow = false
+    //     }
+    //     return
+    //   }
+    //   console.log(resUser.data)
+    // }).catch(errUser => {
+    //   console.log('获取用户信息失败' + errUser)
+    // })
 
     /* 获取用户所在球队信息 */
     this.$API.team.getTeamInfo().then(resTeam => {
@@ -132,9 +140,6 @@ export default {
             this.teamInfo.teamID = resJoin.data.joinData.teamID
             return
           }
-          // if (resJoin.data.status === 201) {
-          //   return console.log(resJoin.data)
-          // }
           console.log(resJoin.data)
         }).catch(errJoin => {
           console.log('获取球队申请状态失败' + errJoin)
@@ -163,15 +168,28 @@ export default {
     //   this.avatarShow = false
     // }
   },
+  mounted () {
+    console.log(sessionStorage.getItem('isLogin'))
+  },
   methods: {
+    ...mapActions('user', ['getUserInfo']),
+    // ...mapMutations('user', ['setUserInfo']),
     logOut () {
       // this.reload()
       localStorage.removeItem('token')
+      sessionStorage.removeItem('isLogin')
       Object.assign(this.$data, this.$options.data())
     },
     ToLogin () {
       this.$router.push('/user/login')
     }
+  },
+  computed: {
+    ...mapState({
+      username: (state) => {
+        return state.user.username
+      }
+    })
   }
 }
 </script>

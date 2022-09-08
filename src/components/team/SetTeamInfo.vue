@@ -42,7 +42,6 @@
 
 // import axios from 'axios'
 import { Toast } from 'vant'
-import axios from 'axios'
 
 export default {
   name: 'SetTeamInfo',
@@ -51,64 +50,60 @@ export default {
       teamID: '',
       teamName: '',
       teamSlogan: '',
-      fileList: [],
-      teamDesc: ''
+      teamDesc: '',
+      fileList: []
     }
   },
 
   created () {
     /* 获取个人信息 */
-    const token = localStorage.getItem('token')
-    const UserRes = axios.get('http://127.0.0.1:3030/my/userinfo', { headers: { Authorization: token } })
-    UserRes.then(val => {
-      // console.log(val.data)
-      this.teamName = val.data.data.teamName
-      this.teamID = val.data.data.teamID
+    this.$API.user.getUserInfo().then(res => {
+      if (res.data.status === 200) {
+        console.log(res.data)
+        this.teamName = res.data.userData.teamName
+        this.teamID = res.data.userData.teamID
+        return
+      }
+      console.log(res.data)
     }).catch(err => {
       console.log(err)
     })
   },
 
   methods: {
-    async onSubmit (values) {
+    onSubmit (values) {
       if (values.teamDesc === '' && values.teamSlogan === '' && values.teamPic.length === 0) {
         return alert('啥也没干，不能提交')
       }
       // console.log('submit', values)
-
       if (confirm('确认修改球队' + this.teamName + '的信息吗')) {
-        const token = localStorage.getItem('token')
-        const { data: res } = await axios.post('http://127.0.0.1:3030/team/setTeamInfo', {
-          teamSlogan: values.teamSlogan,
-          teamDesc: values.teamDesc,
-          teamID: this.teamID
-        }, { headers: { Authorization: token } })
-        // console.log(res)
+        if (values.teamDesc !== '' || values.teamSlogan !== '') {
+          const teamData = {
+            teamSlogan: values.teamSlogan,
+            teamDesc: values.teamDesc,
+            teamID: this.teamID,
+            updateTime: new Date().toJSON()
+          }
+          this.$API.team.setTeamInfo(teamData).then(res => {
+            console.log(res.data)
+          }).catch(err => {
+            console.log(err)
+          })
+        }
 
         if (values.teamPic.length !== 0) {
           const formData = new FormData()
           // formData.append('avatar', { team: this.teamID }, values.teamPic[0].file)
           formData.append('avatar', values.teamPic[0].file, this.teamID)
-          const res1 = axios.post('http://127.0.0.1:3030/team/setteamPic', formData, {
-            headers: { Authorization: token, enctype: 'multipart/form-data' }
-          })
-          // console.log(res1)
-          res1.then(val => {
-            // console.log(val.data)
-            alert('更新资料成功（包含头像修改）')
-            this.$router.replace('/team/teaminfo')
-          }).catch(err => {
-            console.log(err)
-          })
-        } else {
-          if (res.status === 200) {
-            alert('更新资料成功(不包括头像)')
-            this.$router.replace('/team/teaminfo')
-          }
-        }
 
-        // console.log(res)
+          this.$API.team.setPic(formData).then(result => {
+            console.log(result.data)
+          }).catch(error => {
+            console.log(error)
+          })
+        }
       }
+      this.$router.replace('/team/teamCenter')
     },
     beforeRead (file) {
       // console.log(file)

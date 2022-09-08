@@ -43,8 +43,6 @@
 </template>
 
 <script>
-// import axios from 'axios'
-// import router from '@/router/index'
 
 export default {
   inject: ['reload'],
@@ -63,14 +61,15 @@ export default {
     login () {
       const data = {
         username: this.username,
-        password: this.password
+        password: this.password,
+        time: new Date().toJSON()
       }
       this.$API.user.login(data).then(resLogin => {
         if (resLogin.data.status === 100) {
           localStorage.setItem('token', resLogin.data.userData.token)
+          sessionStorage.setItem('isLogin', 1)
           // alert('登陆成功')
           this.$router.replace('/user')
-          // this.$router.push('/my/userinfo')
         }
         console.log(resLogin.data)
       }).catch(errLogin => {
@@ -80,7 +79,8 @@ export default {
     register () {
       const data = {
         username: this.username,
-        password: this.password
+        password: this.password,
+        time: new Date().toJSON()
       }
       this.$API.user.register(data).then(res => {
         if (res.data.status === 100) {

@@ -46,12 +46,16 @@
 </template>
 
 <script>
-import axios from 'axios'
+// import axios from 'axios'
 export default {
+  inject: ['reload'],
   data () {
     return {
-      teamName: '',
-      teamID: '',
+      teamInfo: {
+        teamName: '',
+        teamID: ''
+      },
+
       ruleForm: {
         name: '',
         region: '',
@@ -92,28 +96,23 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           console.log(this.ruleForm)
-          const token = localStorage.getItem('token')
-          const res1 = axios({
-            url: 'http://127.0.0.1:3030/team/createTeamActivity',
-            method: 'post',
-            data: {
-              name: this.ruleForm.name,
-              date1: this.ruleForm.date1,
-              date2: this.ruleForm.date2,
-              type: this.ruleForm.type[0],
-              region: this.ruleForm.region,
-              desc: this.ruleForm.desc,
-              resource: this.ruleForm.resource,
-              teamName: this.teamName,
-              teamID: this.teamID
-            },
-            headers: { Authorization: token }
-          })
-
-          res1.then(val => {
-            // console.log(val.data)
-            alert(JSON.stringify(val.data.message))
-            this.$router.replace('/team/activity')
+          const data = {
+            name: this.ruleForm.name,
+            date1: this.ruleForm.date1,
+            date2: this.ruleForm.date2,
+            type: this.ruleForm.type[0],
+            region: this.ruleForm.region,
+            desc: this.ruleForm.desc,
+            resource: this.ruleForm.resource,
+            createTime: new Date().toJSON(),
+            teamName: this.teamInfo.teamName,
+            teamID: this.teamInfo.teamID
+          }
+          this.$API.activity.create(data).then(res => {
+            console.log(res.data)
+            if (res.data.status === 200) {
+              this.$router.replace('/activity/list')
+            }
           }).catch(err => {
             console.log(err)
           })
@@ -128,18 +127,17 @@ export default {
     }
   },
   created () {
-    const token = localStorage.getItem('token')
-    const resAxios = axios({
-      url: 'http://127.0.0.1:3030/team/teamInfo',
-      method: 'get',
-      headers: { Authorization: token }
-    })
-    resAxios.then(val => {
-      console.log(val.data)
-      this.teamName = val.data.teamInfo[0].teamName
-      this.teamID = val.data.teamInfo[0].id
-    }).catch(err => {
-      console.log(err)
+    /* 获取用户所在球队信息 */
+    this.$API.team.getTeamInfo().then(resTeam => {
+      if (resTeam.data.status === 200) {
+        console.log(resTeam.data)
+        this.teamInfo.teamName = resTeam.data.teamInfo[0].teamName
+        this.teamInfo.teamID = resTeam.data.teamInfo[0].id
+        return
+      }
+      console.log(resTeam.data)
+    }).catch(errTeam => {
+      console.log('获取球队信息失败' + errTeam)
     })
   }
 }

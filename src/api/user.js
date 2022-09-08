@@ -17,6 +17,14 @@ export function login (userData) {
   })
 }
 
+export function setPassword (data) {
+  return request({
+    url: '/my/setpassword',
+    method: 'post',
+    data: data
+  })
+}
+
 export function getUserInfo () {
   return request({
     url: '/my/userinfo',
@@ -32,11 +40,10 @@ export function setUserInfo (data) {
   })
 }
 
-export function setUserPic (FormData) {
+export function setPic (formData) {
   return request({
-    url: '/my/setpic',
+    url: '/my/setPic',
     method: 'post',
-    FormData,
-    headers: { enctype: 'multipart/form-data' }
+    data: formData
   })
 }

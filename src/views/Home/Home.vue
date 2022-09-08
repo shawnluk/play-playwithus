@@ -1,39 +1,38 @@
 <template>
   <!-- <div><h1>Home</h1></div> -->
   <div>
+
     <div class="search_header">
       <div class="demo-type">
-        <div>
           <el-avatar icon="el-icon-user-solid" class="el-avatar" :src='this.userinfo.picUrl'></el-avatar>
-        </div>
       </div>
       <van-search v-model="value" placeholder="请输入搜索关键词"  />
       <div @click="onSearch" class="search_text">搜索</div>
     </div>
+
     <van-swipe class="my-swipe" :autoplay="3000"  lazy-render>
-      <van-swipe-item>
-        <van-image class="van-swipe-img" src="//n.sinaimg.cn/sports/crawl/270/w750h320/20220627/7fbf-cfdafb302ffa174a4b8fa6476b29cd81.jpg" fix=" fill" :show-error="true" />
-      </van-swipe-item>
-      <van-swipe-item>
-        <van-image class="van-swipe-img" src="//n.sinaimg.cn/sports/crawl/117/w550h367/20220627/4495-66a5f28d19a1751705da9964e2314f0c.jpg" fix=" fill" :show-error="true"/>
+      <van-swipe-item v-for="item in this.newList" :key="item.id">
+        <van-image class="van-swipe-img" :src="item.picUrl" fix=" fill" :show-error="true" />
       </van-swipe-item>
     </van-swipe>
+
     <div class="btn_wrap">
       <el-row>
         <el-button size="medium" round @click="CreateTeam">我要组队</el-button>
         <el-button size="medium" round @click="CreateTeamActivity">发布赛事</el-button>
       </el-row>
     </div>
+
     <van-notice-bar left-icon="volume-o" :text="notice_text" scrollable  delay=0 @replay ='replay' />
+
     <el-tabs type="border-card" stretch>
       <el-tab-pane>
-        <span slot="label"><i class="el-icon-date"></i> 近期活动</span>
+        <span slot="label"><i class="el-icon-date">近期活动</i></span>
         <el-table
         :data="activityList"
         style="width: 100%">
           <el-table-column
             label="日期"
-            width="190"
           >
           <!-- v-fit-columns -->
             <template slot-scope="scope">
@@ -43,7 +42,7 @@
           </el-table-column>
           <el-table-column
             label="球队"
-            width="100">
+            >
             <template slot-scope="scope">
               <el-popover trigger="hover" placement="top">
                 <p>创建者: {{ scope.row.username }}</p>
@@ -56,7 +55,7 @@
           </el-table-column>
           <el-table-column
             label="活动名称"
-            width="100">
+            >
             <template slot-scope="scope">
               <el-popover trigger="hover" placement="top">
                 <p>比赛形式: {{ scope.row.acti_resource }}</p>
@@ -69,7 +68,7 @@
           </el-table-column>
           <el-table-column
             label="活动地址"
-            width="200">
+            >
             <template slot-scope="scope">
               <el-popover trigger="hover" placement="top">
                 <p>比赛描述: {{ scope.row.acti_desc }}</p>
@@ -101,9 +100,6 @@
 
 <script>
 import axios from 'axios'
-// import { getUserInfo } from '@/api/user.js'
-// import { getTeamInfo } from '@/api/team.js'
-// import { getActivity } from '@/api/activity.js'
 
 export default {
   name: 'Home',
@@ -137,7 +133,7 @@ export default {
     }
   },
   created () {
-    this.initImgList()
+    // this.initImgList()
 
     /* 获取用户信息和球队信息 */
     this.$API.user.getUserInfo().then(resUser => {
@@ -222,7 +218,8 @@ export default {
       console.log('搜索')
     },
     async initImgList () {
-      const { data: res } = await axios.get('htt://api.tianapi.com/tiyu/index?key=d388d86cba602a7b9d3db549bf2e4aca&num=4')
+      const { data: res } = await axios.get('http://api.tianapi.com/football/index?key=d388d86cba602a7b9d3db549bf2e4aca&num=4')
+      console.log(res)
       this.newList = res.newslist
       // console.log(this.newList)
     },
@@ -230,7 +227,7 @@ export default {
       if (this.teamInfo.teamName !== null) {
         return alert('已加入球队，不能再申请创建或加入其他球队')
       }
-      this.$router.push('/team/Create')
+      this.$router.push('/team/create')
     },
     testArr () {
       const arr = this.activityList
@@ -240,7 +237,7 @@ export default {
           date: item.acti_date
         }
       })
-      console.log(newArr)
+      // console.log(newArr)
       this.notice_text = JSON.stringify(newArr[Math.floor(Math.random() * newArr.length)])
       // console.log('this.notice_text的值是:' + this.notice_text)
     },
@@ -267,7 +264,7 @@ export default {
         return alert('你的球队已经创建了活动')
       }
       // console.log('可以创建')
-      this.$router.push('/team/createTeamActivity')
+      this.$router.push('/activity/create')
     }
   }
 }
@@ -283,28 +280,28 @@ export default {
   }
   .van-search{
     background-color: red;
+     flex-basis:80%
   }
 
   .search_text{
     line-height: 54px;
     color: white;
+    flex-basis:25%;
+    text-align: center;
   }
-
   .demo-type{
-    position: relative;
-    width: 54px;
-    height: 54px;
+  flex-basis:25% ;
+  width: 54px;
+  height: 54px;
     .el-avatar{
-      position: absolute;
-      margin: auto;
-      padding: 0;
-      top: 0;
-      bottom: 0;
-      right: 0;
+      display:block;
+      margin: 0 auto;
+      margin-top: 7px;
     }
-
   }
+
   .my-swipe .van-swipe-item {
+    width: 100%;
     // color: #fff;
     // font-size: 20px;
     // line-height: 150px;
@@ -331,7 +328,7 @@ export default {
   .my-swipe{
     // overflow: hidden;
     width:90%;
-    height: 200px;
+    height: 500px;
     // position: relative;
     // background-size: cover;
     // padding-top: 100%;
@@ -361,6 +358,16 @@ export default {
     margin-top: 10px;
   }
   .el-tabs{
+    .el-tab-pane{
+      .el-table{
+        // display: flex;
+      }
+      .el-table-column:first-child{
+        // width: 40%;
+        // flex-basis: 40%;
+        min-width:200px
+      }
+    }
     margin-top: 10px;
   }
 

@@ -1,4 +1,13 @@
 import request from '@/utils//request.js'
+// import axios from 'axios'
+
+export function createTeam (teamData) {
+  return request({
+    url: '/team/create',
+    method: 'post',
+    data: teamData
+  })
+}
 
 export function getTeamInfo () {
   return request({
@@ -29,6 +38,22 @@ export function getTeamList () {
   })
 }
 
+export function setTeamInfo (teamData) {
+  return request({
+    url: 'team/setTeamInfo',
+    method: 'post',
+    data: teamData
+  })
+}
+
+export function setPic (formData) {
+  return request({
+    url: '/team/setPic',
+    method: 'post',
+    data: formData
+  })
+}
+
 export function teamJoin (teamData) {
   return request({
     url: '/team/join',
@@ -53,9 +78,10 @@ export function teamDelete (data) {
   })
 }
 
-export function DeleteJoinStatus () {
+export function deleteTeamJoin (updateTime) {
   return request({
-    url: '/team/deleteJoinStatus',
-    method: 'post'
+    url: '/team/deleteTeamJoin',
+    method: 'post',
+    data: updateTime
   })
 }

@@ -41,16 +41,15 @@ export default {
       const innerName = e.currentTarget.parentElement.children.item(1).innerHTML
       const teamObj = {
         teamID: innerID,
-        teamName: innerName
+        teamName: innerName,
+        createTime: new Date().toJSON
       }
       if (confirm('你想加入的球队是：' + JSON.stringify(teamObj))) {
         this.$API.team.teamJoin(teamObj).then(resJoin => {
-          if (resJoin.data.status !== 200) {
-            console.log(resJoin.data)
-            return false
-          }
           console.log(resJoin.data)
-          this.$router.replace('/team/teaminfo')
+          if (resJoin.data.status === 200) {
+            this.$router.replace('/team/teamCenter')
+          }
         }).catch(errJoin => {
           console.log('errJoin' + errJoin)
         })
@@ -73,17 +72,15 @@ export default {
   },
   created () {
     this.$API.team.getTeamList().then(resTeam => {
+      console.log(resTeam.data)
       if (resTeam.data.status === 200) {
-        console.log(resTeam.data)
         for (let i = 0; i < resTeam.data.teamList.length; i++) {
           this.teamList.push({
             id: resTeam.data.teamList[i].id,
             value: resTeam.data.teamList[i].teamName
           })
         }
-        return
       }
-      console.log(resTeam.data)
     }).catch(errTeam => {
       console.log('errTeam' + errTeam)
     })

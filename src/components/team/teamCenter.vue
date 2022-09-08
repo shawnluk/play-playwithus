@@ -123,73 +123,65 @@ export default {
     })
 
     /* 获取用户所在球队信息 */
-    this.$API.team.getTeamInfo().then(resTeam => {
-      // 已经加入球队
-      if (resTeam.data.status === 200) {
+    this.$API.team.getTeamInfo()
+      .then(resTeam => {
         console.log(resTeam.data)
-        this.teamInfo.checkTeamMemberDisable = false
-        this.teamInfo.teamName = resTeam.data.teamInfo[0].teamName
-        this.teamInfo.teamID = resTeam.data.teamInfo[0].id
-        this.teamInfo.teamCaptain = resTeam.data.teamInfo[0].newCaptain
-        this.teamInfo.captainID = resTeam.data.teamInfo[0].CaptainID
-        this.teamInfo.teamPic = 'https://' + resTeam.data.teamInfo[0].teamPic
+        // 已经加入球队
+        if (resTeam.data.status === 200) {
+          this.teamInfo.checkTeamMemberDisable = false
+          this.teamInfo.teamName = resTeam.data.teamInfo[0].teamName
+          this.teamInfo.teamID = resTeam.data.teamInfo[0].id
+          this.teamInfo.teamCaptain = resTeam.data.teamInfo[0].newCaptain
+          this.teamInfo.captainID = resTeam.data.teamInfo[0].CaptainID
+          this.teamInfo.teamPic = 'https://' + resTeam.data.teamInfo[0].teamPic
 
-        /*  获取球员列表 */
-        const data = { teamID: this.teamInfo.teamID }
+          /*  获取球员列表 */
+          const data = { teamID: this.teamInfo.teamID }
 
-        this.$API.team.getTeamMember(data).then(resMember => {
-          if (resMember.data.status === 200) {
+          this.$API.team.getTeamMember(data).then(resMember => {
+            if (resMember.data.status === 200) {
+              console.log(resMember.data)
+              // console.log(resMember.data.memberData.list1)
+              this.teamInfo.teamMemberList = resMember.data.memberList[0]
+              this.teamInfo.joinTeam_memberList = resMember.data.memberList[1]
+
+              this.teamInfo.teamMemberList.splice(this.teamInfo.teamMemberList.findIndex(item => item.id === this.teamInfo.captainID), 1)
+
+              if (this.teamInfo.teamMemberList.length !== 0) {
+                this.el_popoverDisable = false
+              }
+              if (this.teamInfo.teamMemberList.length !== 0) {
+                this.teamInfo.noMember = ''
+              }
+              if (this.teamInfo.joinTeam_memberList.length !== 0) {
+                this.teamInfo.noJoin = ''
+              }
+              return
+            }
             console.log(resMember.data)
-            this.teamInfo.teamMemberList = resMember.data.memberData.list1
-            this.teamInfo.teamMemberList.splice(this.teamInfo.teamMemberList.findIndex(item => item.id === this.teamInfo.captainID), 1)
-            this.teamInfo.joinTeam_memberList = resMember.data.memberData.list2
+          }).catch(errMember => {
+            console.log('errMember' + errMember)
+          })
 
-            if (this.teamInfo.teamMemberList.length !== 0) {
-              this.el_popoverDisable = false
-            }
-            if (this.teamInfo.teamMemberList.length !== 0) {
-              this.teamInfo.noMember = ''
-            }
-            if (this.teamInfo.joinTeam_memberList.length !== 0) {
-              this.teamInfo.noJoin = ''
-            }
-            return
-          }
-          // if (resMember.data.status === 400) {
-          //   // return alert('提交了错误的teamID')
-          //   return console.log(resMember.data)
-          // }
-          console.log(resMember.data)
-        }).catch(errMember => {
-          console.log('errMember' + errMember)
-        })
-
-        return
-      }
-      // 处于球队加入申请状态
-      if (resTeam.data.status === 201) {
-        this.$API.team.getTeamJoinStatus().then(resJoin => {
-          if (resJoin.data.status === 200) {
-            console.log(resJoin.data)
-            this.teamInfo.teamName = resJoin.data.joinData.teamName + '（等待队长同意加入申请）'
-            this.teamInfo.teamID = resJoin.data.joinData.teamID
-            this.teamInfo.joinStatus = resJoin.data.joinData.joinStatus
-            return
-          }
-          // if (resJoin.data.status === 201) {
-          //   return console.log(resJoin.data)
-          // }
-
-          return console.log(resJoin.data)
-        }).catch(errJoin => {
-          console.log('获取球队申请状态失败' + errJoin)
-        })
-        return
-      }
-      console.log(resTeam.data)
-    }).catch(errTeam => {
-      console.log('获取球队信息失败' + errTeam)
-    })
+          return
+        }
+        // 处于球队加入申请状态
+        if (resTeam.data.status === 201) {
+          this.$API.team.getTeamJoinStatus()
+            .then(resJoin => {
+              console.log(resJoin.data)
+              if (resJoin.data.status === 200) {
+                this.teamInfo.teamName = resJoin.data.joinData.teamName + '（等待队长同意加入申请）'
+                this.teamInfo.teamID = resJoin.data.joinData.teamID
+                this.teamInfo.joinStatus = 1
+              }
+            }).catch(errJoin => {
+              console.log('获取球队申请状态失败' + errJoin)
+            })
+        }
+      }).catch(errTeam => {
+        console.log('获取球队信息失败' + errTeam)
+      })
   },
 
   // beforeDestroy () {
@@ -203,12 +195,13 @@ export default {
         teamID: this.teamInfo.teamID,
         newCaptain: newCaptainObj[0]
       }
-      this.$API.team.teamQuit(data).then(resQuit => {
-        console.log(resQuit.data)
-        this.reload()
-      }).catch(errQuit => {
-        console.log('errQuit' + errQuit)
-      })
+      this.$API.team.teamQuit(data)
+        .then(resQuit => {
+          console.log(resQuit.data)
+          this.reload()
+        }).catch(errQuit => {
+          console.log('errQuit' + errQuit)
+        })
     },
     QuitTeam () {
       // this.el_popoverDisable = true
@@ -220,7 +213,6 @@ export default {
       }
 
       if (confirm('你是否要退出球队：' + this.teamInfo.teamName)) {
-        // .......................
         // 队员退出球队
         if (this.userinfo.userID !== this.teamInfo.captainID) {
           this.el_popoverDisable = true
@@ -228,23 +220,26 @@ export default {
             teamID: this.teamInfo.teamID,
             newCaptain: ''
           }
-          this.$API.team.teamQuit(data).then(resQuit => {
-            console.log(resQuit.data)
-            this.reload()
-          }).catch(errQuit => {
-            console.log('errQuit' + errQuit)
-          })
-          return
+          this.$API.team.teamQuit(data)
+            .then(resQuit => {
+              console.log(resQuit.data)
+              this.reload()
+            }).catch(errQuit => {
+              console.log('errQuit' + errQuit)
+            })
+          return false
         }
         // .......................
         // 只有队长一人,退出球队
         if (this.userinfo.userID === this.teamInfo.captainID && this.teamInfo.teamMemberList.length === 0) {
           if (confirm('此操作是要删除球队：' + this.teamInfo.teamName)) {
             const data = {
-              teamID: this.teamInfo.teamID
+              teamID: this.teamInfo.teamID,
+              deleteTime: new Date().toJSON()
             }
             this.$API.team.teamDelete(data).then(resDelete => {
               console.log(resDelete.data)
+              this.reload()
             }).catch(errDelete => {
               console.log('errDelete' + errDelete)
             })
@@ -259,10 +254,11 @@ export default {
     DeleteTeamJoin () {
       if (!this.teamInfo.joinStatus) {
         alert('你没有申请球队,请勿乱按')
-        return
+        return false
       }
 
-      this.$API.team.DeleteJoinStatus().then(res => {
+      const updateTime = new Date().toJSON()
+      this.$API.team.deleteTeamJoin(updateTime).then(res => {
         console.log(res.data)
         this.reload()
       }).catch(err => {
@@ -270,7 +266,7 @@ export default {
       })
     },
     toActivity () {
-      this.$router.push('/team/Activity')
+      this.$router.push('/activity/list')
     },
     joinTeam () {
       if (this.teamInfo.teamName !== '') {
@@ -291,7 +287,7 @@ export default {
       if (this.userinfo.userID !== this.teamInfo.captainID) {
         return alert('你不是球队队长，不能修改球队资料')
       }
-      this.$router.push('/team/SetTeamInfo')
+      this.$router.push('/team/setTeamInfo')
     }
   }
 }
