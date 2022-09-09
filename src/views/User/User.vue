@@ -98,18 +98,7 @@ export default {
         this.avatarShow = false
       }
     }, 100)
-    // console.log(this.$store.state.user)
-    // console.log(this.$store.state.user.username)
-    // this.loginShow = false
-    // this.avatarShow = false
-    // this.logIn()
-    // const isLogin = sessionStorage.getItem('isLogin')
-    // console.log(isLogin)
-    // console.log(this.username)
-    // if (isLogin === 1) {
-    //   this.loginShow = false
-    //   this.avatarShow = false
-    // }
+
     /* 获取用户信息 */
     // this.$API.user.getUserInfo().then(resUser => {
     //   if (resUser.data.status === 200) {
@@ -183,10 +172,15 @@ export default {
     // }
   },
   mounted () {
-    // console.log(sessionStorage.getItem('isLogin'))
-    // this.$nextTick()
-    // console.log(this.$store.state.user)
-    // console.log(this.$store.state.user.username)
+    setTimeout(() => {
+      // console.log(this.$store.state.user.username)
+      if (this.$store.state.user.username) {
+        this.loginShow = false
+      }
+      if (this.$store.state.user.userPic) {
+        this.avatarShow = false
+      }
+    })
   },
   methods: {
     ...mapActions('user', ['getUserInfo']),
