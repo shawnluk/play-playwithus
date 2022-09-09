@@ -172,15 +172,6 @@ export default {
     // }
   },
   mounted () {
-    setTimeout(() => {
-      // console.log(this.$store.state.user.username)
-      if (this.$store.state.user.username) {
-        this.loginShow = false
-      }
-      if (this.$store.state.user.userPic) {
-        this.avatarShow = false
-      }
-    })
   },
   methods: {
     ...mapActions('user', ['getUserInfo']),
