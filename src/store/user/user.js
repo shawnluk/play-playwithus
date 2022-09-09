@@ -19,8 +19,8 @@ const UserModule = {
     setUserInfo (state, value) {
       state.userID = value.id
       state.username = value.username
-      state.nickname = value.nickname
-      state.email = value.email
+      // state.nickname = value.nickname
+      // state.email = value.email
       state.userPic = 'https://' + value.userPic
       // sessionStorage.setItem('isLogin', 1)
     }
@@ -28,10 +28,10 @@ const UserModule = {
   actions: {
     async getUserInfo (store) {
       const res = await getUserInfo()
-      console.log(res.data)
       if (res.data.status === 200) {
         store.commit('setUserInfo', res.data.userData)
       }
+      console.log(res.data)
     }
   }
 }
