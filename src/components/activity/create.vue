@@ -46,16 +46,12 @@
 </template>
 
 <script>
-// import axios from 'axios'
+import { mapActions } from 'vuex'
+
 export default {
   inject: ['reload'],
   data () {
     return {
-      teamInfo: {
-        teamName: '',
-        teamID: ''
-      },
-
       ruleForm: {
         name: '',
         region: '',
@@ -92,6 +88,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions('team', ['getTeamInfo']),
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
@@ -104,9 +101,8 @@ export default {
             region: this.ruleForm.region,
             desc: this.ruleForm.desc,
             resource: this.ruleForm.resource,
-            createTime: new Date().toJSON(),
-            teamName: this.teamInfo.teamName,
-            teamID: this.teamInfo.teamID
+            teamName: this.$store.state.team.teamInfo.teamName,
+            teamID: this.$store.state.team.teamInfo.teamID
           }
           this.$API.activity.create(data).then(res => {
             console.log(res.data)
@@ -128,17 +124,7 @@ export default {
   },
   created () {
     /* 获取用户所在球队信息 */
-    this.$API.team.getTeamInfo().then(resTeam => {
-      if (resTeam.data.status === 200) {
-        console.log(resTeam.data)
-        this.teamInfo.teamName = resTeam.data.teamInfo[0].teamName
-        this.teamInfo.teamID = resTeam.data.teamInfo[0].id
-        return
-      }
-      console.log(resTeam.data)
-    }).catch(errTeam => {
-      console.log('获取球队信息失败' + errTeam)
-    })
+    this.getTeamInfo()
   }
 }
 </script>

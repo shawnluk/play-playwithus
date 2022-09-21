@@ -7,13 +7,19 @@ import User from '../views/User/User.vue'
 import CreateTeam from '@/components/team/create.vue'
 import UserLogin from '@/components/user/UserLogin.vue'
 import UserInfo from '@/components/user/UserInfo.vue'
-import teamJoin from '@/components/team/join.vue'
+// import teamJoin from '@/components/team/join.vue'
 import UserData from '@/components/user/SetUserData.vue'
 import setPassword from '@/components/user/SetPassword.vue'
 import createActivity from '@/components/activity/create.vue'
 import teamActivity from '@/components/activity/list.vue'
 import SetTeamInfo from '@/components/team/SetTeamInfo.vue'
 import TeamInfo from '@/components/team/teamCenter.vue'
+import { getUserInfo } from '@/api/user'
+
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push (location) {
+  return originalPush.call(this, location).catch(err => err)
+}
 
 Vue.use(VueRouter)
 
@@ -28,7 +34,7 @@ const routes = [
   { path: '/my/userinfo', component: UserInfo, meta: { TabBarShow: false } },
   { path: '/my/update', component: UserData, meta: { TabBarShow: false } },
   { path: '/my/setPassword', component: setPassword, meta: { TabBarShow: false } },
-  { path: '/team/join', component: teamJoin, meta: { TabBarShow: false } },
+  // { path: '/team/join', component: teamJoin, meta: { TabBarShow: false } },
   { path: '/activity/create', component: createActivity, meta: { TabBarShow: false } },
   { path: '/activity/list', component: teamActivity, meta: { TabBarShow: false } },
   { path: '/team/teamCenter', component: TeamInfo, meta: { TabBarShow: false } },
@@ -40,43 +46,23 @@ const router = new VueRouter({
   routes
 })
 
+const RouterArr = ['/home', '/teamList', '/stadium', '/user', '/activity/list', '/user/login']
 router.beforeEach((to, from, next) => {
-  // if (to.path === '/my/userinfo') {
-  //   if (from.path === '/user/login') {
-  //     next()
-  //   } else {
-  //     const token = localStorage.getItem('token')
-  //     if (!token) {
-  //       next('/user/login')
-  //     } else {
-  //       const res = getUserinfo()
-  //       res.then(res1 => {
-  //         if (res1.status === 403) {
-  //           alert(JSON.stringify(res1))
-  //           next('/user/login')
-  //         }
-  //         next()
-  //       })
-  //     }
-  //   }
-  // }
-  // if (to.path === '/my/setpassword') {
-  //   const token = localStorage.getItem('token')
-  //   if (!token) {
-  //     next('/user/login')
-  //   } else {
-  //     const res = getUserinfo()
-  //     res.then(res1 => {
-  //       if (res1.status === 403) {
-  //         alert(JSON.stringify(res1))
-  //         next('/user/login')
-  //       }
-  //       next()
-  //     })
-  //   }
-  // }
-  if (from.path === '/user/login') {
-    next()
+  if (!RouterArr.includes(to.path)) {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      alert('token不存在,请先登陆')
+      next('/user/login')
+      return
+    }
+    getUserInfo().then(res => {
+      if (res.data.status === 200) {
+        console.log('用户token验证通过')
+        return next()
+      }
+      console.log(res.data)
+      next('/user/login')
+    })
   }
   next()
 })

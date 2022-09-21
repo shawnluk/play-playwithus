@@ -3,7 +3,7 @@
     <h5>球队信息修改页面</h5>
       <van-form @submit="onSubmit">
         <van-field
-          v-model="teamName"
+          v-model="this.$store.state.team.teamInfo.teamName"
           name="teamName"
           label="球队名称"
           placeholder="球队名称"
@@ -42,13 +42,12 @@
 
 // import axios from 'axios'
 import { Toast } from 'vant'
+import { mapActions } from 'vuex'
 
 export default {
   name: 'SetTeamInfo',
   data () {
     return {
-      teamID: '',
-      teamName: '',
       teamSlogan: '',
       teamDesc: '',
       fileList: []
@@ -57,32 +56,23 @@ export default {
 
   created () {
     /* 获取个人信息 */
-    this.$API.user.getUserInfo().then(res => {
-      if (res.data.status === 200) {
-        console.log(res.data)
-        this.teamName = res.data.userData.teamName
-        this.teamID = res.data.userData.teamID
-        return
-      }
-      console.log(res.data)
-    }).catch(err => {
-      console.log(err)
-    })
+    // this.getTeamInfo()
   },
 
   methods: {
+    ...mapActions('team', ['getTeamInfo']),
     onSubmit (values) {
       if (values.teamDesc === '' && values.teamSlogan === '' && values.teamPic.length === 0) {
         return alert('啥也没干，不能提交')
       }
       // console.log('submit', values)
-      if (confirm('确认修改球队' + this.teamName + '的信息吗')) {
+      if (confirm('确认修改球队' + this.$store.state.team.teamInfo.teamName + '的信息吗')) {
         if (values.teamDesc !== '' || values.teamSlogan !== '') {
           const teamData = {
             teamSlogan: values.teamSlogan,
             teamDesc: values.teamDesc,
-            teamID: this.teamID,
-            updateTime: new Date().toJSON()
+            teamID: this.$store.state.team.teamInfo.id
+            // updateTime: new Date().toJSON()
           }
           this.$API.team.setTeamInfo(teamData).then(res => {
             console.log(res.data)
@@ -94,7 +84,7 @@ export default {
         if (values.teamPic.length !== 0) {
           const formData = new FormData()
           // formData.append('avatar', { team: this.teamID }, values.teamPic[0].file)
-          formData.append('avatar', values.teamPic[0].file, this.teamID)
+          formData.append('avatar', values.teamPic[0].file, this.$store.state.team.teamInfo.id)
 
           this.$API.team.setPic(formData).then(result => {
             console.log(result.data)
@@ -103,6 +93,8 @@ export default {
           })
         }
       }
+
+      this.getTeamInfo()
       this.$router.replace('/team/teamCenter')
     },
     beforeRead (file) {

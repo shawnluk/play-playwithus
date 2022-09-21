@@ -75,8 +75,8 @@ export default {
           }
           const data = {
             oldPass: this.ruleForm.oldPass,
-            newPass: this.ruleForm.newPass,
-            time: new Date().toJSON()
+            newPass: this.ruleForm.newPass
+            // time: new Date().toJSON()
           }
           this.$API.user.setPassword(data).then(res => {
             console.log(res.data)

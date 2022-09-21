@@ -4,55 +4,12 @@
     <el-button  type="button" class="btn btn-primary" @click="createActivity" :disabled='buttonDisabled'>创建我的活动</el-button>
     <el-button  type="danger" class="btn btn-primary" @click="deleteActivity" :disabled='DeleteDisabled' plain>撤销活动申请</el-button>
     <div>
-      <p>我的球队名称:   {{this.teamInfo.teamName}}</p>
+      <p>我的球队名称:   {{this.$store.state.team.teamInfo.teamName}}</p>
       <p>我的球队活动:   {{this.myActi_name}}</p>
     </div>
-      <!-- <el-table
-    :data="activityList"
-    height="250"
-    border
-    style="width: 100%"
-    :default-sort = "{prop: 'acti_date', order: 'descending'}"
-    > -->
-    <!-- v-fit-columns -->
-    <!-- width="100" -->
-    <!-- <el-table-column
-      prop="acti_date"
-      label="日期"
-      sortable
-      fixed
-    > -->
-    <!-- </el-table-column>
-    <el-table-column
-      prop="teamName"
-      label="球队名称"
-    >
-    </el-table-column>
-    <el-table-column
-      prop="username"
-      label="创建者">
-    </el-table-column>
-        <el-table-column
-      prop="acti_region"
-      label="地址">
-    </el-table-column>
-        <el-table-column
-      prop="acti_type"
-      label="比赛类型">
-    </el-table-column>
-        <el-table-column
-      prop="acti_resource"
-      label="比赛形式">
-    </el-table-column>
-        <el-table-column
-      prop="acti_desc"
-      label="比赛描述">
-    </el-table-column>
-  </el-table> -->
-
     <el-table
     :key="key"
-    :data="activityList"
+    :data="this.$store.state.activity.activityList"
     style="width: 100%;"
     :default-sort = "{prop: 'acti_date', order: 'descending'}"
     >
@@ -84,8 +41,7 @@
 
 <script>
 
-// import axios from 'axios'
-// import getMaxLength from '@/api/tableWidth'
+import { mapActions } from 'vuex'
 
 const tableContent = [
   // { label: '序号', prop: 'id' },
@@ -104,28 +60,6 @@ export default {
   inject: ['reload'],
   data () {
     return {
-      userinfo: {
-        userID: '',
-        username: '',
-        password: '',
-        nickname: '',
-        email: '',
-        userPic: '',
-        picUrl: ''
-      },
-      teamInfo: {
-        teamName: '',
-        teamID: '',
-        joinStatus: false,
-        activeName: '0',
-        checkTeamMemberDisable: false,
-        teamMemberList: [],
-        joinTeam_memberList: [],
-        teamCaptain: '',
-        captainID: ''
-        // selectCaptain: ''
-      },
-      activityList: [],
       myActi_name: '',
       myActi_id: '',
       buttonDisabled: false,
@@ -135,6 +69,9 @@ export default {
     }
   },
   methods: {
+    ...mapActions('activity', ['getActivity']),
+    ...mapActions('user', ['getUserInfo']),
+    ...mapActions('team', ['getTeamInfo']),
     GoBackIndex () {
       this.$router.replace('/home')
     },
@@ -166,7 +103,8 @@ export default {
     },
 
     createActivity () {
-      if (this.userinfo.userID !== this.teamInfo.captainID) {
+      console.log(this.$store.state.user.userID + '+' + this.$store.state.team.teamInfo.captainID)
+      if (this.$store.state.user.userID !== this.$store.state.team.teamInfo.captainID) {
         return alert('你不是球队队长，不能创建活动')
       }
       this.$router.push('/activity/create')
@@ -180,8 +118,8 @@ export default {
       if (confirm('你是否真的要撤销活动：' + this.myActi_name)) {
         const data = {
           acti_name: this.myActi_name,
-          acti_id: this.myActi_id,
-          updateTime: new Date().toJSON()
+          acti_id: this.myActi_id
+          // updateTime: new Date().toJSON()
         }
         this.$API.activity.deleteActivity(data).then(res => {
           if (res.data.status === 200) {
@@ -198,100 +136,42 @@ export default {
   },
   created () {
     /* 获取用户信息和球队信息 */
-    this.$API.user.getUserInfo().then(resUser => {
-      if (resUser.data.status === 200) {
-        console.log(resUser.data)
-        this.userinfo.userID = resUser.data.userData.id
-        this.userinfo.username = resUser.data.userData.username
-        this.userinfo.nickname = resUser.data.userData.nickname
-        this.userinfo.email = resUser.data.userData.email
-        this.userinfo.userPic = resUser.data.userData.userPic
-
-        // 拼接用户头像src
-        if (this.userinfo.userPic !== null) {
-          const picUrl = 'https://' + this.userinfo.userPic
-          this.userinfo.picUrl = picUrl
-        }
-        return
-      }
-      console.log(resUser.data)
-    }).catch(errUser => {
-      console.log('获取用户信息失败' + errUser)
-    })
+    this.getUserInfo()
 
     /* 获取用户所在球队信息 */
-    this.$API.team.getTeamInfo().then(resTeam => {
-      // 已经加入球队
-      if (resTeam.data.status === 200) {
-        console.log(resTeam.data)
-        this.teamInfo.teamName = resTeam.data.teamInfo[0].teamName
-        this.teamInfo.teamID = resTeam.data.teamInfo[0].id
-        this.teamInfo.teamCaptain = resTeam.data.teamInfo[0].newCaptain
-        this.teamInfo.captainID = resTeam.data.teamInfo[0].CaptainID
-        return
-      }
-      // 处于球队加入申请状态
-      if (resTeam.data.status === 201) {
-        this.$API.team.getTeamJoinStatus().then(resJoin => {
-          if (resJoin.data.status === 200) {
-            console.log(resJoin.data)
-            this.teamInfo.teamName = resJoin.data.joinData.teamName + '（等待队长同意加入申请）'
-            this.teamInfo.teamID = resJoin.data.joinData.teamID
-            return
-          }
-          // if (resJoin.data.status === 201) {
-          //   return console.log(resJoin.data)
-          // }
-          console.log(resJoin.data)
-        }).catch(errJoin => {
-          console.log('获取球队申请状态失败' + errJoin)
-        })
-        return
-      }
-      console.log(resTeam.data)
-    }).catch(errTeam => {
-      console.log('获取球队信息失败' + errTeam)
-    })
+    this.getTeamInfo()
 
     /* 获取活动列表信息 */
-    this.$API.activity.getActivity().then(resActi => {
-      console.log(resActi.data)
-      if (resActi.data.status === 200) {
-        this.activityList = resActi.data.ActiData
-        const arrRes = this.activityList.filter((item, index) => {
-          return item.teamName === this.teamInfo.teamName
-        })
-        // console.log(arrRes)
-        if (arrRes.length === 0) {
-          this.myActi_name = ''
-        } else {
-          this.myActi_name = arrRes[0].acti_name
-          this.myActi_id = arrRes[0].id
-          this.buttonDisabled = true
-        }
-        return
-      }
-      console.log(resActi.data)
-      // console.log(this.activityList)
-    }).catch(errActi => {
-      console.log('获取活动列表失败' + errActi)
-    })
+    this.getActivity()
   },
   watch: {
     /**
-         * 监控表格的数据data，自动设置表格宽度
-         */
-    activityList (valArr) {
-      const _this = this
-      this.formThead = tableContent.map(function (value) {
-        const arr = valArr.map(x => x[value.prop]) // 获取每一列的所有数据
-        arr.push(value.label) // 把每列的表头也加进去算
-        value.width = _this.getMaxLength(arr) + 20 // 每列内容最大的宽度 + 表格的内间距(依据实际情况而定)
-        return value
-      })
+      * 监控activityList内容，自动设置表格宽度
+    */
+
+    '$store.state.activity.activityList': {
+      handler: function (valArr) {
+        const _this = this
+        this.formThead = tableContent.map(function (value) {
+          const arr = valArr.map(x => x[value.prop]) // 获取每一列的所有数据
+          arr.push(value.label) // 把每列的表头也加进去算
+          value.width = _this.getMaxLength(arr) + 20 // 每列内容最大的宽度 + 表格的内间距(依据实际情况而定)
+          return value
+        })
+
+        const arr = this.$store.state.activity.activityList.filter((item, index) => {
+          return item.teamName === this.$store.state.team.teamInfo.teamName
+        })
+        if (arr.length === 0) {
+          this.myActi_name = ''
+        } else {
+          this.myActi_name = arr[0].acti_name
+          this.myActi_id = arr[0].id
+          this.buttonDisabled = true
+        }
+      }
     }
   }
-
 }
 
 </script>

@@ -69,7 +69,7 @@ export default {
           localStorage.setItem('token', resLogin.data.userData.token)
           sessionStorage.setItem('isLogin', 1)
           // alert('登陆成功')
-          this.$router.replace('/user')
+          this.$router.replace('/home')
         }
         console.log(resLogin.data)
       }).catch(errLogin => {
@@ -79,8 +79,8 @@ export default {
     register () {
       const data = {
         username: this.username,
-        password: this.password,
-        time: new Date().toJSON()
+        password: this.password
+        // time: new Date().toJSON()
       }
       this.$API.user.register(data).then(res => {
         if (res.data.status === 100) {

@@ -7,22 +7,13 @@ const UserModule = {
   namespaced: true,
   state () {
     return {
-      userID: '',
-      username: '',
-      nickname: '',
-      email: '',
-      userPic: '',
-      createTime: ''
+      userinfo: window.sessionStorage.getItem('userinfo') !== null ? JSON.parse(window.sessionStorage.getItem('userinfo')) : ''
     }
   },
   mutations: {
     setUserInfo (state, value) {
-      state.userID = value.id
-      state.username = value.username
-      // state.nickname = value.nickname
-      // state.email = value.email
-      state.userPic = 'https://' + value.userPic
-      // sessionStorage.setItem('isLogin', 1)
+      state.userinfo = value
+      sessionStorage.setItem('userinfo', JSON.stringify(state.userinfo))
     }
   },
   actions: {

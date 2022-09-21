@@ -21,6 +21,7 @@
 <script>
 // import axios from 'axios'
 import { Toast } from 'vant'
+import { mapActions } from 'vuex'
 
 export default {
   name: 'setUserInfo',
@@ -34,6 +35,8 @@ export default {
     }
   },
   methods: {
+    ...mapActions('user', ['getUserInfo']),
+
     uploadPic () {
       this.show = true
     },
@@ -43,13 +46,14 @@ export default {
       if (confirmRes) {
         const data = {
           nickname: this.nickValue,
-          email: this.emailValue,
-          time: new Date().toJSON()
+          email: this.emailValue
+          // time: new Date().toJSON()
         }
         // console.log(typeof data.updateTime)
         this.$API.user.setUserInfo(data).then(resSetUser => {
           console.log(resSetUser.data)
           alert(JSON.stringify(resSetUser.data))
+          this.getUserInfo()
         }).catch(errSetUser => {
           console.log('修改用户信息失败' + errSetUser)
         })
@@ -79,6 +83,7 @@ export default {
           formData.append('avatar', file.file)
           this.$API.user.setPic(formData).then(resUserPic => {
             console.log(resUserPic.data)
+            this.getUserInfo()
             this.reload()
           }).catch(errUserPic => {
             console.log(errUserPic)

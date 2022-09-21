@@ -44,6 +44,7 @@
 <script>
 // import axios from 'axios'
 import { Toast } from 'vant'
+import { mapActions } from 'vuex'
 
 export default {
   name: 'createTeam',
@@ -59,6 +60,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions('team', ['getTeamInfo']),
     onSubmit (values) {
       console.log('submit', values)
 
@@ -66,18 +68,16 @@ export default {
         const teamData = {
           teamName: values.teamName,
           teamSlogan: values.teamSlogan,
-          teamDesc: values.teamDesc,
-          createTime: new Date().toJSON()
+          teamDesc: values.teamDesc
+          // createTime: new Date().toJSON()
         }
 
         this.$API.team.createTeam(teamData).then(res => {
           console.log(res.data)
           if (res.data.status === 200) {
-            this.teamID = res.data.teamID
-
             if (values.teamPic.length !== 0) {
               const formData = new FormData()
-              formData.append('avatar', values.teamPic[0].file, this.teamID)
+              formData.append('avatar', values.teamPic[0].file, res.data.teamInfo.teamID)
 
               this.$API.team.setPic(formData).then(result => {
                 console.log(result.data)
@@ -85,6 +85,7 @@ export default {
                 console.log(error)
               })
             }
+            this.getTeamInfo()
             this.$router.replace('/team/teamCenter')
           }
         }).catch(err => {
@@ -106,8 +107,6 @@ export default {
       // console.log(file)
       // console.log('111:' + typeof file.file)
     }
-  },
-  created () {
   }
 }
 </script>

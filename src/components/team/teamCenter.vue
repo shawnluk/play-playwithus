@@ -1,10 +1,10 @@
 <template>
   <div>
     <h5>球队信息页面</h5>
-    <div>球队：{{teamInfo.teamName}}</div>
+    <div>球队：{{this.$store.state.team.teamInfo.teamName}}</div>
     <div class="pic">
       头像：
-      <img :src='teamInfo.teamPic' alt="">
+      <img :src='this.$store.state.team.teamInfo.teamPic' alt="">
     </div>
     <el-button  type="button" class="btn btn-primary" @click="createTeam">创建我的球队</el-button>
     <el-button  type="button" class="btn btn-primary" @click="joinTeam">加入球队</el-button>
@@ -17,15 +17,10 @@
     width="400"
     trigger="click"
     :disabled='el_popoverDisable'
-
     >
-    <!-- <el-table :data="teamInfo.teamMemberList">
-      <el-table-column width="150" property="id" label="id"></el-table-column>
-      <el-table-column width="100" property="username" label="姓名"></el-table-column>
-    </el-table> -->
       <el-select v-model="value" placeholder="请先选择新队长" @change='selectCaptain'>
         <el-option
-          v-for="item in teamInfo.teamMemberList"
+          v-for="item in teamMemberList"
           :key="item.id"
           :label="item.username"
           :value="item.username"
@@ -37,193 +32,118 @@
       </el-button>
     </el-popover>
     <!-- </el-button> -->
-    <van-collapse v-model="teamInfo.activeName" accordion >
+    <van-collapse v-model="activeName" accordion >
       <van-collapse-item title="查看我的球队成员"
       name="1"
-      :disabled="teamInfo.checkTeamMemberDisable"
+      :disabled="checkTeamMemberDisable"
       >
         <div> 队长：</div>
-        <div> =======>>{{this.teamInfo.teamCaptain}}</div>
-        <div> 队员：{{this.teamInfo.noMember}}</div>
-        <div v-for=" item in teamInfo.teamMemberList" :key='item.id'
+        <div> =======>>{{this.$store.state.team.teamInfo.newCaptain}}</div>
+        <div> 队员：{{this.noMember}}</div>
+        <div v-for=" item in teamMemberList" :key='item.id'
         >
         =======>>{{item.username}}
         </div>
-        <div>等待申请通过：{{this.teamInfo.noJoin}}</div>
-        <div v-for=" item in teamInfo.joinTeam_memberList" :key='item.id'
+        <div>等待申请通过：{{this.noJoin}}</div>
+        <div v-for=" item in joinTeam_memberList" :key='item.id'
         >
         =======>>{{item.username}}
         </div>
       </van-collapse-item>
     </van-collapse>
+    <button type="button" class="btn btn-primary" @click="toIndex" >回到用户中心</button>
   </div>
 </template>
 
 <script>
 
-// import axios from 'axios'
-// import { getUserInfo } from '@/api/user.js'
-// import { getTeamInfo, getTeamJoinStatus } from '@/api/team.js'
-
+import { mapActions } from 'vuex'
 export default {
   name: 'TeamInfo',
   inject: ['reload'],
   data () {
     return {
-      userinfo: {
-        userID: '',
-        username: '',
-        password: '',
-        nickname: '',
-        email: '',
-        userPic: '',
-        picUrl: ''
-      },
-      teamInfo: {
-        noMember: 'null',
-        noJoin: 'null',
-        teamName: '',
-        teamID: '',
-        joinStatus: 0,
-        activeName: '0',
-        checkTeamMemberDisable: true,
-        teamMemberList: [{ username: '无' }],
-        joinTeam_memberList: [{ username: '无' }],
-        teamCaptain: '',
-        captainID: '',
-        teamPic: ''
-        // selectCaptain: ''
-      },
+      noMember: 'null',
+      noJoin: 'null',
+      activeName: '0',
+      checkTeamMemberDisable: true,
+      teamMemberList: [{ username: '无' }],
+      joinTeam_memberList: [{ username: '无' }],
       el_popoverDisable: true,
       value: ''
     }
   },
   created () {
-    /* 获取用户信息 */
-    this.$API.user.getUserInfo().then(resUser => {
-      if (resUser.data.status === 200) {
-        console.log(resUser.data)
-        this.userinfo.userID = resUser.data.userData.id
-        this.userinfo.username = resUser.data.userData.username
-        this.userinfo.nickname = resUser.data.userData.nickname
-        this.userinfo.email = resUser.data.userData.email
-        this.userinfo.userPic = resUser.data.userData.userPic
-
-        // 拼接用户头像src
-        if (this.userinfo.userPic !== null) {
-          const picUrl = 'https://' + this.userinfo.userPic
-          this.userinfo.picUrl = picUrl
-          this.avatarShow = false
+    // ··········································
+    // 获取球员列表
+    if (this.$store.state.team.teamInfo !== '' && this.$store.state.team.teamInfo.joinStatus === undefined) {
+      const data = { teamID: this.$store.state.team.teamInfo.id }
+      this.$API.team.getTeamMember(data).then(result => {
+        console.log(result.data)
+        if (result.data.status === 200) {
+          this.teamMemberList = result.data.memberList[0].filter(item => item.userID !== this.$store.state.team.teamInfo.CaptainID)
+          this.joinTeam_memberList = result.data.memberList[1]
+          if (this.teamMemberList.length !== 0) {
+            this.el_popoverDisable = false
+          }
+          if (this.teamMemberList.length !== 0) {
+            this.noMember = ''
+          }
+          if (this.joinTeam_memberList.length !== 0) {
+            this.noJoin = ''
+          }
         }
-        return
-      }
-      console.log(resUser.data)
-    }).catch(errUser => {
-      console.log('获取用户信息失败' + errUser)
-    })
-
-    /* 获取用户所在球队信息 */
-    this.$API.team.getTeamInfo()
-      .then(resTeam => {
-        console.log(resTeam.data)
-        // 已经加入球队
-        if (resTeam.data.status === 200) {
-          this.teamInfo.checkTeamMemberDisable = false
-          this.teamInfo.teamName = resTeam.data.teamInfo[0].teamName
-          this.teamInfo.teamID = resTeam.data.teamInfo[0].id
-          this.teamInfo.teamCaptain = resTeam.data.teamInfo[0].newCaptain
-          this.teamInfo.captainID = resTeam.data.teamInfo[0].CaptainID
-          this.teamInfo.teamPic = 'https://' + resTeam.data.teamInfo[0].teamPic
-
-          /*  获取球员列表 */
-          const data = { teamID: this.teamInfo.teamID }
-
-          this.$API.team.getTeamMember(data).then(resMember => {
-            if (resMember.data.status === 200) {
-              console.log(resMember.data)
-              // console.log(resMember.data.memberData.list1)
-              this.teamInfo.teamMemberList = resMember.data.memberList[0]
-              this.teamInfo.joinTeam_memberList = resMember.data.memberList[1]
-
-              this.teamInfo.teamMemberList.splice(this.teamInfo.teamMemberList.findIndex(item => item.id === this.teamInfo.captainID), 1)
-
-              if (this.teamInfo.teamMemberList.length !== 0) {
-                this.el_popoverDisable = false
-              }
-              if (this.teamInfo.teamMemberList.length !== 0) {
-                this.teamInfo.noMember = ''
-              }
-              if (this.teamInfo.joinTeam_memberList.length !== 0) {
-                this.teamInfo.noJoin = ''
-              }
-              return
-            }
-            console.log(resMember.data)
-          }).catch(errMember => {
-            console.log('errMember' + errMember)
-          })
-
-          return
-        }
-        // 处于球队加入申请状态
-        if (resTeam.data.status === 201) {
-          this.$API.team.getTeamJoinStatus()
-            .then(resJoin => {
-              console.log(resJoin.data)
-              if (resJoin.data.status === 200) {
-                this.teamInfo.teamName = resJoin.data.joinData.teamName + '（等待队长同意加入申请）'
-                this.teamInfo.teamID = resJoin.data.joinData.teamID
-                this.teamInfo.joinStatus = 1
-              }
-            }).catch(errJoin => {
-              console.log('获取球队申请状态失败' + errJoin)
-            })
-        }
-      }).catch(errTeam => {
-        console.log('获取球队信息失败' + errTeam)
       })
+      this.checkTeamMemberDisable = false
+    }
   },
 
-  // beforeDestroy () {
-  //   bus.$emit('share', this.username)
-  // },
   methods: {
+    ...mapActions('team', ['getTeamInfo']),
+
+    toIndex () { this.$router.replace('/home') },
+
     selectCaptain (selectCaptain) {
-      // console.log(selectCaptain)
-      const newCaptainObj = this.teamInfo.teamMemberList.filter(item => item.username === selectCaptain)
+      const newCaptainObj = this.teamMemberList.filter(item => item.username === selectCaptain)
+      console.log(newCaptainObj)
       const data = {
-        teamID: this.teamInfo.teamID,
+        teamID: this.$store.state.team.teamInfo.id,
         newCaptain: newCaptainObj[0]
       }
       this.$API.team.teamQuit(data)
         .then(resQuit => {
           console.log(resQuit.data)
-          this.reload()
+          sessionStorage.setItem('teamInfo', JSON.stringify(''))
+          this.getTeamInfo()
+          this.$router.go(0)
         }).catch(errQuit => {
           console.log('errQuit' + errQuit)
         })
     },
+
     QuitTeam () {
-      // this.el_popoverDisable = true
-      if (this.teamInfo.joinStatus === 1) {
+      if (this.$store.state.team.teamInfo.joinStatus === 1) {
         return alert('球队申请中，请选择撤销申请')
       }
-      if (this.teamInfo.teamName === null) {
+      if (!this.$store.state.team.teamInfo.teamName) {
         return alert('你还未加入任何球队')
       }
 
-      if (confirm('你是否要退出球队：' + this.teamInfo.teamName)) {
+      if (confirm('你是否要退出球队：' + this.$store.state.team.teamInfo.teamName)) {
         // 队员退出球队
-        if (this.userinfo.userID !== this.teamInfo.captainID) {
+        if (this.$store.state.user.userinfo.id !== this.$store.state.team.teamInfo.CaptainID) {
           this.el_popoverDisable = true
           const data = {
-            teamID: this.teamInfo.teamID,
+            teamID: this.$store.state.team.teamInfo.id,
             newCaptain: ''
           }
           this.$API.team.teamQuit(data)
             .then(resQuit => {
               console.log(resQuit.data)
-              this.reload()
+              sessionStorage.setItem('teamInfo', JSON.stringify(''))
+              this.getTeamInfo()
+              this.$router.go(0)
+              // this.reload()
             }).catch(errQuit => {
               console.log('errQuit' + errQuit)
             })
@@ -231,15 +151,18 @@ export default {
         }
         // .......................
         // 只有队长一人,退出球队
-        if (this.userinfo.userID === this.teamInfo.captainID && this.teamInfo.teamMemberList.length === 0) {
-          if (confirm('此操作是要删除球队：' + this.teamInfo.teamName)) {
+        if (this.$store.state.user.userinfo.id === this.$store.state.team.teamInfo.CaptainID && this.teamMemberList.length === 0) {
+          if (confirm('此操作是要删除球队：' + this.$store.state.team.teamInfo.teamName)) {
             const data = {
-              teamID: this.teamInfo.teamID,
+              teamID: this.$store.state.team.teamInfo.id,
               deleteTime: new Date().toJSON()
             }
             this.$API.team.teamDelete(data).then(resDelete => {
               console.log(resDelete.data)
-              this.reload()
+              sessionStorage.setItem('teamInfo', JSON.stringify(''))
+              this.getTeamInfo()
+              this.$router.go(0)
+              // this.reload()
             }).catch(errDelete => {
               console.log('errDelete' + errDelete)
             })
@@ -251,8 +174,9 @@ export default {
         this.reload()
       }
     },
+
     DeleteTeamJoin () {
-      if (!this.teamInfo.joinStatus) {
+      if (!this.$store.state.team.teamInfo.joinStatus) {
         alert('你没有申请球队,请勿乱按')
         return false
       }
@@ -260,31 +184,40 @@ export default {
       const updateTime = new Date().toJSON()
       this.$API.team.deleteTeamJoin(updateTime).then(res => {
         console.log(res.data)
-        this.reload()
+        if (res.data.status === 200) {
+          sessionStorage.setItem('teamInfo', JSON.stringify(''))
+          this.getTeamInfo()
+          this.$router.go(0)
+        }
       }).catch(err => {
         console.log(err)
       })
+      // this.reload()
     },
+
     toActivity () {
       this.$router.push('/activity/list')
     },
+
     joinTeam () {
-      if (this.teamInfo.teamName !== '') {
+      if (this.$store.state.team.teamInfo.teamName) {
         return alert('已加入球队，不能再申请加入其他球队')
       }
-      this.$router.push('/team/join')
+      this.$router.push('/teamList')
     },
+
     createTeam () {
-      if (this.teamInfo.teamName !== '') {
+      if (this.$store.state.team.teamInfo.teamName) {
         return alert('球队名不为空,已加入球队')
       }
       this.$router.push('/team/create')
     },
+
     setTeamInfo () {
-      if (this.teamInfo.teamName === '') {
+      if (!this.$store.state.team.teamInfo.teamName) {
         return alert('你还未加入任何球队')
       }
-      if (this.userinfo.userID !== this.teamInfo.captainID) {
+      if (this.$store.state.user.userinfo.id !== this.$store.state.team.teamInfo.CaptainID) {
         return alert('你不是球队队长，不能修改球队资料')
       }
       this.$router.push('/team/setTeamInfo')

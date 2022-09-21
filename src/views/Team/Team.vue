@@ -1,10 +1,17 @@
 <template>
-  <div><h1>team</h1></div>
+  <div>
+    <teamList></teamList>
+  </div>
 </template>
 
 <script>
+import teamList from '@/components/team/join.vue'
 export default {
-  name: 'Team'
+  name: 'Team',
+  components: {
+    teamList
+  }
+
 }
 </script>
 
