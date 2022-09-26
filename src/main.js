@@ -9,6 +9,29 @@ import BaiduMap from 'vue-baidu-map'
 import Plugin from 'v-fit-columns'
 import API from './api/index'
 import store from './store'
+import VueSocketIO from 'vue-socket.io'
+import SocketIO from 'socket.io-client'
+
+// const socket = io('ws://127.0.0.1:3000', {
+//   autoConnect: false,
+//   query: {
+//     userID: this.$store.state.user.userinfo.username
+//   }
+// })
+// socket.open()
+
+Vue.use(
+  new VueSocketIO({
+    // debug: true,
+    connection: SocketIO('ws://localhost:3000', {
+      autoConnect: false
+      // query: {
+      //   user: JSON.stringify(store.state.user.userinfo)
+      // },
+      // store
+    })
+  })
+)
 
 Vue.use(Plugin)
 Vue.use(ElementUI)

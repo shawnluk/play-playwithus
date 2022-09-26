@@ -70,14 +70,20 @@ export default {
   },
   methods: {
     ...mapActions('activity', ['getActivity']),
-    ...mapActions('user', ['getUserInfo']),
-    ...mapActions('team', ['getTeamInfo']),
+    // ...mapActions('user', ['getUserInfo']),
+    // ...mapActions('team', ['getTeamInfo']),
     GoBackIndex () {
       this.$router.replace('/home')
     },
     handleChat (index, row) {
       console.log(row)
       alert('你要联系的活动发起者为' + row.username)
+      this.$router.replace({
+        path: '/chat',
+        query: {
+          toUser: row.username
+        }
+      })
     },
     getMaxLength (arr) {
       return arr.reduce((acc, item) => {
@@ -136,10 +142,10 @@ export default {
   },
   created () {
     /* 获取用户信息和球队信息 */
-    this.getUserInfo()
+    // this.getUserInfo()
 
     /* 获取用户所在球队信息 */
-    this.getTeamInfo()
+    // this.getTeamInfo()
 
     /* 获取活动列表信息 */
     this.getActivity()

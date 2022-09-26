@@ -129,6 +129,13 @@ export default {
     /* 获取活动列表信息 */
     this.getActivity()
   },
+  mounted () {
+    // console.log(this.$store.state.user.userinfo.username)
+    // setTimeout(() => {
+    // this.$socket.open()
+    // console.log(this.$socket.io.opts.store)
+    // }, 100)
+  },
   methods: {
     ...mapActions('activity', ['getActivity']),
     ...mapActions('user', ['getUserInfo']),
@@ -187,6 +194,9 @@ export default {
         return alert('你的球队已经创建了活动')
       }
       this.$router.push('/activity/create')
+    },
+    connectServer () {
+      this.$socket.emit('connectServer', this.$store.state.user.userinfo.username)
     }
   },
   watch: {
@@ -202,6 +212,17 @@ export default {
           return
         }
         this.notice_text = '暂无活动数据'
+      },
+      immediate: true
+    },
+    '$store.state.user.userinfo.username': {
+      handler: function (newValue, oldValue) {
+        // console.log(newValue + '+' + oldValue)
+        if (newValue) {
+          this.$socket.close()
+          this.$socket.open()
+          this.connectServer()
+        }
       },
       immediate: true
     }

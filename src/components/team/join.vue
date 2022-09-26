@@ -18,6 +18,8 @@
             <div>{{item.id}}</div>
             <!-- index:{{index}} -->
             <div>{{item.value}}</div>
+            <div v-show='false'>{{item.CaptainID}}</div>
+            <div v-show='false'>{{item.newCaptain}}</div>
             <el-button type="primary" size="mini" @click="Join">加入</el-button>
       </div>
     </div>
@@ -38,9 +40,14 @@ export default {
   },
   methods: {
     ...mapActions('team', ['getTeamList', 'getTeamInfo']),
+    ioJoinTeam (newCaptain) {
+      this.$socket.emit('ioJoinTeam', newCaptain)
+    },
     Join (e) {
       const innerID = parseInt(e.currentTarget.parentElement.children.item(0).innerHTML)
       const innerName = e.currentTarget.parentElement.children.item(1).innerHTML
+      const newCaptain = e.currentTarget.parentElement.children.item(3).innerHTML
+      // console.log(CaptainID)
       const teamObj = {
         teamID: innerID,
         teamName: innerName
@@ -49,6 +56,10 @@ export default {
         this.$API.team.teamJoin(teamObj).then(resJoin => {
           console.log(resJoin.data)
           if (resJoin.data.status === 200) {
+            this.$socket.close()
+            this.$socket.open()
+            this.$socket.emit('connectServer', this.$store.state.user.userinfo.username)
+            this.ioJoinTeam(newCaptain)
             this.getTeamInfo()
             this.$router.replace('/team/teamCenter')
           }
@@ -74,19 +85,6 @@ export default {
   },
   created () {
     this.getTeamList()
-    // this.$API.team.getTeamList().then(resTeam => {
-    //   console.log(resTeam.data)
-    //   if (resTeam.data.status === 200) {
-    //     for (let i = 0; i < resTeam.data.teamList.length; i++) {
-    //       this.teamList.push({
-    //         id: resTeam.data.teamList[i].id,
-    //         value: resTeam.data.teamList[i].teamName
-    //       })
-    //     }
-    //   }
-    // }).catch(errTeam => {
-    //   console.log('errTeam' + errTeam)
-    // })
   }
 }
 </script>

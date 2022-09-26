@@ -42,7 +42,9 @@ const TeamModule = {
       for (let i = 0; i < value.length; i++) {
         state.teamList.push({
           id: value[i].id,
-          value: value[i].teamName
+          value: value[i].teamName,
+          CaptainID: value[i].CaptainID,
+          newCaptain: value[i].newCaptain
         })
       }
     }

@@ -102,7 +102,7 @@ export default {
             desc: this.ruleForm.desc,
             resource: this.ruleForm.resource,
             teamName: this.$store.state.team.teamInfo.teamName,
-            teamID: this.$store.state.team.teamInfo.teamID
+            teamID: this.$store.state.team.teamInfo.id
           }
           this.$API.activity.create(data).then(res => {
             console.log(res.data)

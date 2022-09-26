@@ -19,9 +19,14 @@
       <el-col :span="6"><div class="grid-content bg-purple"></div></el-col>
       <el-col :span="6"><div class="grid-content bg-purple-light"></div></el-col>
     </el-row>
-    <van-cell-group inset>
-      <van-cell title="我的消息" value="" is-link />
-    </van-cell-group>
+      <van-cell-group inset>
+        <van-cell title="我的消息" is-link >
+            <template #right-icon>
+              <van-badge :content="count" max="9"/>
+            </template>
+        </van-cell>
+      </van-cell-group>
+
     <van-cell-group inset>
       <van-cell title="当前赛事" value="查看活动" is-link to='/activity/list' />
     </van-cell-group>
@@ -41,7 +46,6 @@
     </van-cell-group>
     <el-row class="user_logout" round>
       <el-button round @click="logOut">退出登陆</el-button>
-      <!-- <el-button round @click="refresh">刷新</el-button> -->
     </el-row>
   </div>
 
@@ -57,36 +61,42 @@ export default {
   data () {
     return {
       loginShow: true,
-      avatarShow: true
+      avatarShow: true,
+      count: 0,
+      contentMsg: []
+    }
+  },
+
+  sockets: {
+    getJoinMsg (data) {
+      console.log(data)
+      if (data) {
+        this.count++
+        this.contentMsg.push(data.msg)
+        console.log(this.contentMsg)
+      }
     }
   },
   created () {
-    /* 获取用户信息 */
-    // this.getUserInfo()
 
-    /* 获取用户所在球队信息 */
-    // this.getTeamInfo()
   },
 
   mounted () {
+    // console.log(this.$socket.open())
+
   },
   methods: {
-    // ...mapActions('user', ['getUserInfo']),
-    // ...mapActions('team', ['getTeamInfo']),
-    logOut () {
-      localStorage.removeItem('token')
-      // Object.assign(this.$data, this.$options.data())
 
+    logOut () {
+      // Object.assign(this.$data, this.$options.data())
+      localStorage.removeItem('token')
       sessionStorage.clear()
-      // this.reload()
+      this.$socket.close()
       this.$router.go(0)
     },
     ToLogin () {
       this.$router.push('/user/login')
     }
-    // refresh () {
-    //   this.reload()
-    // }
 
   },
   computed: {
@@ -99,7 +109,6 @@ export default {
   watch: {
     '$store.state.user.userinfo.username': {
       handler: function (newValue, oldValue) {
-        // console.log(newValue)
         if (newValue) {
           this.loginShow = false
         }
