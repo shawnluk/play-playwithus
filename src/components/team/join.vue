@@ -41,16 +41,19 @@ export default {
   methods: {
     ...mapActions('team', ['getTeamList', 'getTeamInfo']),
     ioJoinTeam (newCaptain) {
-      this.$socket.emit('ioJoinTeam', newCaptain)
+      this.$socket.emit('JoinTeam', newCaptain)
     },
     Join (e) {
       const innerID = parseInt(e.currentTarget.parentElement.children.item(0).innerHTML)
       const innerName = e.currentTarget.parentElement.children.item(1).innerHTML
+      const CaptainID = e.currentTarget.parentElement.children.item(2).innerHTML
       const newCaptain = e.currentTarget.parentElement.children.item(3).innerHTML
       // console.log(CaptainID)
       const teamObj = {
         teamID: innerID,
-        teamName: innerName
+        teamName: innerName,
+        CaptainID,
+        newCaptain
       }
       if (confirm('你想加入的球队是：' + JSON.stringify(teamObj))) {
         this.$API.team.teamJoin(teamObj).then(resJoin => {
@@ -58,7 +61,10 @@ export default {
           if (resJoin.data.status === 200) {
             this.$socket.close()
             this.$socket.open()
-            this.$socket.emit('connectServer', this.$store.state.user.userinfo.username)
+            this.$socket.emit('connectServer', {
+              username: this.$store.state.user.userinfo.username,
+              userID: this.$store.state.user.userinfo.id
+            })
             this.ioJoinTeam(newCaptain)
             this.getTeamInfo()
             this.$router.replace('/team/teamCenter')

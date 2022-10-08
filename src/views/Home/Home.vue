@@ -196,7 +196,15 @@ export default {
       this.$router.push('/activity/create')
     },
     connectServer () {
-      this.$socket.emit('connectServer', this.$store.state.user.userinfo.username)
+      // console.log(this.$store.state.user.userinfo.username) ==> undefined
+      if (this.$store.state.user.userinfo.username !== undefined) {
+        const userObj = {
+          username: this.$store.state.user.userinfo.username,
+          userID: this.$store.state.user.userinfo.id
+        }
+        this.$socket.emit('connectServer', userObj)
+      }
+      return false
     }
   },
   watch: {

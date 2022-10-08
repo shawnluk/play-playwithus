@@ -16,6 +16,7 @@ import SetTeamInfo from '@/components/team/SetTeamInfo.vue'
 import TeamInfo from '@/components/team/teamCenter.vue'
 import { getUserInfo } from '@/api/user'
 import chat from '@/components/common/chat.vue'
+import MessageCenter from '@/components/team/MessageCenter.vue'
 
 const originalPush = VueRouter.prototype.push
 VueRouter.prototype.push = function push (location) {
@@ -40,7 +41,8 @@ const routes = [
   { path: '/activity/list', component: teamActivity, meta: { TabBarShow: false } },
   { path: '/team/teamCenter', component: TeamInfo, meta: { TabBarShow: false } },
   { path: '/team/SetTeamInfo', component: SetTeamInfo, meta: { TabBarShow: false } },
-  { path: '/chat', component: chat, meta: { TabBarShow: false } }
+  { path: '/chat', component: chat, meta: { TabBarShow: false } },
+  { path: '/team/MessageCenter', component: MessageCenter, meta: { TabBarShow: false } }
 
 ]
 

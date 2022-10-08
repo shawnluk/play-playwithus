@@ -11,6 +11,7 @@
     <el-button  type="button" class="btn btn-primary" @click="toActivity">查看活动</el-button>
     <el-button  type="button" class="btn btn-primary" @click="DeleteTeamJoin">撤销申请</el-button>
     <el-button  type="button" class="btn btn-primary" @click="setTeamInfo">修改球队资料</el-button>
+    <el-button  type="button" class="btn btn-primary" @click="ToMessageCenter">球队消息界面</el-button>
     <!-- <el-button> -->
     <el-popover
     placement="right"
@@ -101,6 +102,17 @@ export default {
   methods: {
     ...mapActions('team', ['getTeamInfo']),
 
+    ToMessageCenter () {
+      if (this.$store.state.user.userinfo.id !== this.$store.state.team.teamInfo.CaptainID) {
+        return console.log('你不是球队队长')
+      }
+      this.$router.push('/team/MessageCenter')
+    },
+
+    deleteJoinTeam (newCaptain) {
+      this.$socket.emit('deleteJoinTeam', newCaptain)
+    },
+
     toIndex () { this.$router.replace('/home') },
 
     selectCaptain (selectCaptain) {
@@ -182,12 +194,23 @@ export default {
       }
 
       const updateTime = new Date().toJSON()
+      const newCaptain = this.$store.state.team.teamInfo.newCaptain
       this.$API.team.deleteTeamJoin(updateTime).then(res => {
         console.log(res.data)
         if (res.data.status === 200) {
+          this.$socket.close()
+          this.$socket.open()
+          this.$socket.emit('connectServer', {
+            username: this.$store.state.user.userinfo.username,
+            userID: this.$store.state.user.userinfo.id
+          })
+          // this.$socket.emit('deleteJoinTeam', this.$store.state.team.teamInfo.newCaptain)
+          console.log(newCaptain)
+          this.deleteJoinTeam(newCaptain)
           sessionStorage.setItem('teamInfo', JSON.stringify(''))
           this.getTeamInfo()
-          this.$router.go(0)
+          // this.$router.go(0)
+          this.$router.replace('/user')
         }
       }).catch(err => {
         console.log(err)

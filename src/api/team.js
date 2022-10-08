@@ -85,3 +85,11 @@ export function deleteTeamJoin (updateTime) {
     data: updateTime
   })
 }
+
+export function captainAgreeJoin (userObj) {
+  return request({
+    url: '/team/captainAgreeJoin',
+    method: 'post',
+    data: userObj
+  })
+}

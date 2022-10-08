@@ -20,7 +20,7 @@
       <el-col :span="6"><div class="grid-content bg-purple-light"></div></el-col>
     </el-row>
       <van-cell-group inset>
-        <van-cell title="我的消息" is-link >
+        <van-cell title="我的消息" is-link to='/team/MessageCenter' >
             <template #right-icon>
               <van-badge :content="count" max="9"/>
             </template>
@@ -69,23 +69,42 @@ export default {
 
   sockets: {
     getJoinMsg (data) {
-      console.log(data)
+      // console.log(data)
       if (data) {
-        this.count++
-        this.contentMsg.push(data.msg)
+        this.count = data.msg.length
+        // this.contentMsg.push(data.msg)
+        this.contentMsg = data.msg
         console.log(this.contentMsg)
+      }
+    },
+    getDeleteJoinMsg (message) {
+      if (message) {
+        console.log(message)
       }
     }
   },
   created () {
-
+    // this.$socket.open()
   },
 
   mounted () {
     // console.log(this.$socket.open())
-
+    this.$socket.close()
+    this.$socket.open()
+    this.connectServer()
   },
   methods: {
+    connectServer () {
+      // console.log(this.$store.state.user.userinfo.username) ==> undefined
+      if (this.$store.state.user.userinfo.username !== undefined) {
+        const userObj = {
+          username: this.$store.state.user.userinfo.username,
+          userID: this.$store.state.user.userinfo.id
+        }
+        this.$socket.emit('connectServer', userObj)
+      }
+      return false
+    },
 
     logOut () {
       // Object.assign(this.$data, this.$options.data())

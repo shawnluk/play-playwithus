@@ -27,6 +27,8 @@ const TeamModule = {
       state.teamInfo = {
         teamName: value.teamName + '（等待队长同意加入申请）',
         teamID: value.teamID,
+        CaptainID: value.CaptainID,
+        newCaptain: value.newCaptain,
         joinStatus: 1
       }
       sessionStorage.setItem('teamInfo', JSON.stringify(state.teamInfo))
