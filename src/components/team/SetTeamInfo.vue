@@ -82,6 +82,7 @@ export default {
         }
 
         if (values.teamPic.length !== 0) {
+          // console.log(values.teamPic[0].file)
           const formData = new FormData()
           // formData.append('avatar', { team: this.teamID }, values.teamPic[0].file)
           formData.append('avatar', values.teamPic[0].file, this.$store.state.team.teamInfo.id)

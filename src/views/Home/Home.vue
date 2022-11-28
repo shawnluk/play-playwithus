@@ -150,7 +150,7 @@ export default {
       console.log('搜索')
     },
     async initImgList () {
-      const { data: res } = await axios.get('http://api.tianapi.com/football/index?key=d388d86cba602a7b9d3db549bf2e4aca&num=4')
+      const { data: res } = await axios.get('https://api.tianapi.com/football/index?key=d388d86cba602a7b9d3db549bf2e4aca&num=4')
       console.log(res)
       this.newList = res.newslist
     },

@@ -40,8 +40,8 @@ export default {
   },
   methods: {
     ...mapActions('team', ['getTeamList', 'getTeamInfo']),
-    ioJoinTeam (newCaptain) {
-      this.$socket.emit('JoinTeam', newCaptain)
+    ioJoinTeam (captainObj) {
+      this.$socket.emit('JoinTeam', captainObj)
     },
     Join (e) {
       const innerID = parseInt(e.currentTarget.parentElement.children.item(0).innerHTML)
@@ -65,7 +65,11 @@ export default {
               username: this.$store.state.user.userinfo.username,
               userID: this.$store.state.user.userinfo.id
             })
-            this.ioJoinTeam(newCaptain)
+            const captainObj = {
+              CaptainID,
+              newCaptain
+            }
+            this.ioJoinTeam(captainObj)
             this.getTeamInfo()
             this.$router.replace('/team/teamCenter')
           }

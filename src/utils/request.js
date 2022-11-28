@@ -2,7 +2,8 @@ import axios from 'axios'
 import { Toast } from 'vant'
 
 const Axios = axios.create({
-  baseURL: 'http://127.0.0.1:3030',
+  // baseURL: 'https://ifangtu.com:3030', /* 服务器 */
+  baseURL: 'http://127.0.0.1:3030', /* 开发 */
   timeout: 5000
 })
 

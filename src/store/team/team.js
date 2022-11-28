@@ -26,7 +26,7 @@ const TeamModule = {
     setTeamInfo2 (state, value) {
       state.teamInfo = {
         teamName: value.teamName + '（等待队长同意加入申请）',
-        teamID: value.teamID,
+        teamID: value.id,
         CaptainID: value.CaptainID,
         newCaptain: value.newCaptain,
         joinStatus: 1

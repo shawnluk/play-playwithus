@@ -17,7 +17,7 @@
         <el-col class="line" :span="2">-</el-col>
         <el-col :span="11">
           <el-form-item prop="date2">
-            <el-time-picker placeholder="选择时间" v-model="ruleForm.date2" style="width: 100%;"></el-time-picker>
+            <el-time-picker placeholder="选择时间" v-model="ruleForm.date2" value-format="timestamp" style="width: 100%;"></el-time-picker>
           </el-form-item>
         </el-col>
       </el-form-item>
@@ -104,6 +104,7 @@ export default {
             teamName: this.$store.state.team.teamInfo.teamName,
             teamID: this.$store.state.team.teamInfo.id
           }
+          console.log(data)
           this.$API.activity.create(data).then(res => {
             console.log(res.data)
             if (res.data.status === 200) {

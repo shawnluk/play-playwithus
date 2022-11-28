@@ -8,14 +8,25 @@
 
       <!-- 表单区域 -->
       <div class="form-login p-4">
-        <!-- 登录名称 -->
+        <!-- 登录账户 -->
         <div class="form-group form-inline">
-          <label for="username">登录名称</label>
+          <label for="userAccount">登录账户</label>
+          <input
+            type="text"
+            class="form-control ml-2"
+            id="userAccount"
+            placeholder="请输入登录账户"
+            autocomplete="off"
+            v-model.trim="userAccount"
+          />
+        </div>
+        <div class="form-group form-inline">
+          <label for="username">用户昵称</label>
           <input
             type="text"
             class="form-control ml-2"
             id="username"
-            placeholder="请输入登录名称"
+            placeholder="请输入用户昵称(注册时为必填,不要和账户名一致)"
             autocomplete="off"
             v-model.trim="username"
           />
@@ -50,17 +61,19 @@ export default {
   data () {
     return {
       username: '',
+      userAccount: '',
       password: ''
     }
   },
   methods: {
     reset () {
-      this.username = ''
+      this.userAccount = ''
       this.password = ''
+      this.username = ''
     },
     login () {
       const data = {
-        username: this.username,
+        userAccount: this.userAccount,
         password: this.password,
         time: new Date().toJSON()
       }
@@ -78,9 +91,10 @@ export default {
     },
     register () {
       const data = {
+        userAccount: this.userAccount,
+        password: this.password,
         username: this.username,
-        password: this.password
-        // time: new Date().toJSON()
+        time: new Date().toJSON()
       }
       this.$API.user.register(data).then(res => {
         if (res.data.status === 100) {

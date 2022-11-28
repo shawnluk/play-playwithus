@@ -23,7 +23,9 @@ import SocketIO from 'socket.io-client'
 Vue.use(
   new VueSocketIO({
     // debug: true,
+    /* 开发 */
     connection: SocketIO('ws://localhost:3000', {
+      // connection: SocketIO('https://ifangtu.com:3030', {  /*服务器*/
       autoConnect: false
       // query: {
       //   user: JSON.stringify(store.state.user.userinfo)

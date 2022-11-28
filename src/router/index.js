@@ -26,7 +26,8 @@ VueRouter.prototype.push = function push (location) {
 Vue.use(VueRouter)
 
 const routes = [
-  { path: '/', redirect: '/home' },
+  // { path: '/', redirect: '/home' },
+  { path: '/', component: Home, meta: { TabBarShow: true } },
   { path: '/home', component: Home, meta: { TabBarShow: true } },
   { path: '/teamList', component: Team, meta: { TabBarShow: true } },
   { path: '/stadium', component: Stadium, meta: { TabBarShow: true } },
@@ -47,10 +48,11 @@ const routes = [
 ]
 
 const router = new VueRouter({
+  // mode: 'history',
   routes
 })
 
-const RouterArr = ['/home', '/teamList', '/stadium', '/user', '/activity/list', '/user/login']
+const RouterArr = ['/', '/home', '/teamList', '/stadium', '/user', '/activity/list', '/user/login']
 router.beforeEach((to, from, next) => {
   if (!RouterArr.includes(to.path)) {
     const token = localStorage.getItem('token')

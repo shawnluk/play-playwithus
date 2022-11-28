@@ -45,7 +45,7 @@ export default {
       const confirmRes = confirm('你要更新的信息是：' + '昵称：' + this.nickValue + ' 邮箱：' + this.emailValue)
       if (confirmRes) {
         const data = {
-          nickname: this.nickValue,
+          username: this.nickValue,
           email: this.emailValue
           // time: new Date().toJSON()
         }
@@ -53,7 +53,9 @@ export default {
         this.$API.user.setUserInfo(data).then(resSetUser => {
           console.log(resSetUser.data)
           alert(JSON.stringify(resSetUser.data))
-          this.getUserInfo()
+          if (resSetUser.data.status === 200) {
+            this.getUserInfo()
+          }
         }).catch(errSetUser => {
           console.log('修改用户信息失败' + errSetUser)
         })
